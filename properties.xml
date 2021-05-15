@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<java version="16" class="java.beans.XMLDecoder">
+ <object class="sample.UserSettings">
+  <void property="aileron">
+   <string>/controls/flight/aileron[0]</string>
+  </void>
+  <void property="airSpeed">
+   <string>/instrumentation/airspeed-indicator/indicated-speed-kt</string>
+  </void>
+  <void property="altitude">
+   <string>/position/altitude-ft</string>
+  </void>
+  <void property="elevator">
+   <string>/controls/flight/elevator</string>
+  </void>
+  <void property="heading">
+   <string>/orientation/heading-deg</string>
+  </void>
+  <void property="ip">
+   <string>127.0.0.1</string>
+  </void>
+  <void property="port">
+   <string>5400</string>
+  </void>
+  <void property="properties">
+   <object class="sample.Properties">
+    <void property="aileron_max">
+     <int>1</int>
+    </void>
+    <void property="aileron_min">
+     <int>-1</int>
+    </void>
+    <void property="airSpeed_index">
+     <int>21</int>
+    </void>
+    <void property="airSpeed_max">
+     <int>100000</int>
+    </void>
+    <void property="altitude_index">
+     <int>16</int>
+    </void>
+    <void property="altitude_max">
+     <int>1</int>
+    </void>
+    <void property="altitude_min">
+     <int>-1</int>
+    </void>
+    <void property="elevator_index">
+     <int>1</int>
+    </void>
+    <void property="elevator_max">
+     <int>1</int>
+    </void>
+    <void property="elevator_min">
+     <int>-1</int>
+    </void>
+    <void property="heading_index">
+     <int>19</int>
+    </void>
+    <void property="heading_max">
+     <int>300</int>
+    </void>
+    <void property="heading_min">
+     <int>100</int>
+    </void>
+    <void property="rudder_index">
+     <int>2</int>
+    </void>
+    <void property="rudder_max">
+     <int>1</int>
+    </void>
+    <void property="rudder_min">
+     <int>-1</int>
+    </void>
+    <void property="throttle_index">
+     <int>6</int>
+    </void>
+    <void property="throttle_max">
+     <int>1</int>
+    </void>
+    <void property="throttle_min">
+     <int>-1</int>
+    </void>
+   </object>
+  </void>
+  <void property="rudder">
+   <string>/controls/flight/elevator</string>
+  </void>
+  <void property="throttle">
+   <string>/controls/engines/engine[0]/throttle</string>
+  </void>
+ </object>
+</java>
