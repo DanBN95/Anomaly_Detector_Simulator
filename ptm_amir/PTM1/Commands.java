@@ -43,7 +43,6 @@ public class Commands {
 		}
 	}
 
-
 	// the default IO to be used in all commands
 	DefaultIO dio;
 

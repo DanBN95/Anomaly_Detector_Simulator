@@ -10,26 +10,33 @@ import java.util.List;
 
 public class ZscoreAnomalyDetector implements TimeSeriesAnomalyDetector {
 
-    private HashMap<String,Float> zscoremap=new HashMap<String,Float>();
+   private HashMap<String,Float> zscoremap=new HashMap<String,Float>(); 
 
     public float MaxcheckZScore(float[] curColToCheck){
         ArrayList<Float> curArrayList=new ArrayList<>();
-        float curAvg=0, curStiya=0, curZscore=0, maxZscore=0;
+        float  curZscore=0, maxZscore=0;
         Float[] curArray;
         curArrayList.add(curColToCheck[0]);
         for (int j=1;j<curColToCheck.length;j++) {
             curArray = curArrayList.toArray(new Float[0]);
-            curStiya= (float) Math.sqrt(StatLib.var(curArray));
-
+            curZscore= checkZScore(curColToCheck[j],curArray);
             curArrayList.add(curColToCheck[j]);
-            if(curStiya==0){continue; }
-            curAvg=StatLib.avg(curArray);
-            curZscore=Math.abs(curColToCheck[j]-curAvg)/curStiya;
             if(curZscore>maxZscore){
                 maxZscore=curZscore;
             }
         }
         return maxZscore;
+    }
+
+    
+    public float checkZScore(float num,Float[] curColToCheck){
+        float curAvg=0, curStiya=0, curZscore=0;   
+         curStiya= (float) Math.sqrt(StatLib.var(curColToCheck));
+        if(curStiya==0){return 0; }
+        curAvg=StatLib.avg(curColToCheck);
+         curZscore=Math.abs(num-curAvg)/curStiya;
+        return curZscore;
+
     }
 
 
@@ -59,19 +66,15 @@ public class ZscoreAnomalyDetector implements TimeSeriesAnomalyDetector {
             curArrayList.add(curColToCheck[0]);
             for (int i = 1; i < hashSize; i++) {
                 //find the the z score and comper to the high z score
-                curArray = curArrayList.toArray(new Float[0]);
-                curStiya= (float) Math.sqrt(StatLib.var(curArray));
+                curArray=curArrayList.toArray(new Float[0]);
+                curZscore=checkZScore(curColToCheck[i], curArray);
                 curArrayList.add(curColToCheck[i]);
-                if(curStiya==0){continue;}
-                curAvg=StatLib.avg(curArray);
-                curZscore=Math.abs(ts.valueAtIndex(i, features[j])-curAvg)/curStiya;
-                if ( curZscore >= this.zscoremap.get(features[j])) {
+                if ( curZscore > this.zscoremap.get(features[j])) {
                     anomalyReportList.add(new AnomalyReport("division in col " + features[j], (long) i + 1));
                 }
             }
         }
-        curAvg=0;
-            return anomalyReportList;
+        return anomalyReportList;
     }
 
 }
