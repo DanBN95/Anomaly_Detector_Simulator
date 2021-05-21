@@ -1,38 +1,42 @@
 package view.open;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 import javax.swing.*;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
 
-public class OpenController extends JFrame implements ActionListener {
+public class OpenController  {
 
     @FXML
-    Button button;
+    Button open;
 
-    public OpenController() {
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setLayout(new FlowLayout());
+    public File file;
 
-        button = new Button("Open csv file");
-        button.addActionListener(this);
-
-        this.add(button);
-        this.pack();
-        this.setVisible(true);
-    }
+    public OpenController() {}
 
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
+    public void openBtnPreesed() {
+        System.out.println("btn pressed");
+        Stage stage = new Stage();
+        stage.setTitle("File chooser sample");
 
-        if(e.getSource() == button) {
+        final FileChooser fileChooser = new FileChooser();
 
-            JFileChooser file = new JFileChooser();
-
-            file.showOpenDialog(null);
+        file = fileChooser.showOpenDialog(stage);
+        if (file != null) {
+            try {
+                System.out.println(file.getPath());
+            }catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 }

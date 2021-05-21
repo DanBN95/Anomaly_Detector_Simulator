@@ -23,7 +23,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception{
         // create a AnchorPane
         FXMLLoader fxl = new FXMLLoader();
-        AnchorPane root = (AnchorPane) fxl.load(getClass().getResource("sample.fxml"));
+        AnchorPane root = (AnchorPane) fxl.load(getClass().getResource("sample.fxml").openStream());
         Scene scene = new Scene(root);
         View view = fxl.getController();
         Model model = new Model("properties.xml");
@@ -32,6 +32,7 @@ public class Main extends Application {
         primaryStage.setTitle("Flight GUI");
         primaryStage.setScene(scene);
         primaryStage.show();
+        view.init(vm);
     }
 
 

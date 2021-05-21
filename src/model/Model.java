@@ -42,23 +42,24 @@ public class Model extends Observable implements Controller {
     and for every value the fg put it in the right place
     thank to the playback_small file
      */
-        try {
-            String line;
-            InetAddress ia = InetAddress.getByName(userSettings.getIp());
-            System.out.println(userSettings.getIp());
-            fg = new Socket(userSettings.getIp(), Integer.parseInt(userSettings.getPort()));
-            out2fg = new PrintWriter(fg.getOutputStream());
-//            for(int i=1; i<ts.getNumOfFeatures(); i++) {
-//                line = Arrays.toString(ts.row_array(i));
-//                out2fg.println(Arrays.toString(ts.row_array(i)));
-//            }
-
-
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            System.out.println("csvToFg");
+//        try {
+//            String line;
+//            InetAddress ia = InetAddress.getByName(userSettings.getIp());
+//            System.out.println(userSettings.getIp());
+//            fg = new Socket(userSettings.getIp(), Integer.parseInt(userSettings.getPort()));
+//            out2fg = new PrintWriter(fg.getOutputStream());
+////            for(int i=1; i<ts.getNumOfFeatures(); i++) {
+////                line = Arrays.toString(ts.row_array(i));
+////                out2fg.println(Arrays.toString(ts.row_array(i)));
+////            }
+//
+//
+//        } catch (UnknownHostException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
     }
 
     public void setSettings(UserSettings settings) {
