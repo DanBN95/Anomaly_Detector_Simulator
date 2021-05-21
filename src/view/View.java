@@ -9,16 +9,20 @@ import javafx.scene.canvas.GraphicsContext;
 
 import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import view.open.OpenController;
+import view.open.OpenDisplay;
 import view_model.ViewModel;
 
 import javax.swing.*;
 
 
-
+import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
-
+import java.io.File;
+import java.io.IOException;
 
 
 public class View {
@@ -29,11 +33,10 @@ public class View {
         Slider rudder,throttle;
         @FXML
         Button open;
-
-
+//        @FXML
+//        OpenDisplay openDisplay;
 
         ViewModel vm;
-        boolean mousePushed;
         double mx,my;
         FloatProperty aileron,elevator,altitude,airSpeed,heading;
 
@@ -43,20 +46,10 @@ public class View {
             altitude = new SimpleFloatProperty();
             airSpeed = new SimpleFloatProperty();
             heading = new SimpleFloatProperty();
-            mousePushed = false;
-            open = new Button();
-            open.setOnAction(new EventHandler<ActionEvent>() {
-
-                public void handle(ActionEvent event) {
-                    System.out.println(event);
-                    JFileChooser file = new JFileChooser();
-                    file.showOpenDialog(null);
-                }
-            });
-
         }
 
-        void init(ViewModel vm) {
+
+        public void init(ViewModel vm) {
             this.vm = vm;
             vm.rudder.bind(rudder.valueProperty());
             vm.throttle.bind(throttle.valueProperty());
@@ -65,6 +58,7 @@ public class View {
             vm.altitude.bind(altitude);
             vm.airSpeed.bind(airSpeed);
             vm.heading.bind(heading);
+
 
         }
 
@@ -94,30 +88,24 @@ public class View {
         */
 
 
-        public  void mouseDown(MouseEvent me) {
-            if(!mousePushed) {
-                mousePushed = true;
-                System.out.println("mouse is down");
+
+    public void openBtnPreesed() {
+        System.out.println("btn pressed");
+        Stage stage = new Stage();
+        stage.setTitle("File chooser sample");
+
+        final FileChooser fileChooser = new FileChooser();
+
+        File file = fileChooser.showOpenDialog(stage);
+        if (file != null) {
+            try {
+                System.out.println(file.getPath());
+                vm.setTimeSeries(file);
+            }catch (Exception e) {
+                e.printStackTrace();
             }
         }
-
-        public  void mouseUp(MouseEvent me) {
-            if(!mousePushed) {
-                mousePushed = false;
-                System.out.println("mouse is down");
-            }
-        }
-
-//    @Override
-//    public void actionPerformed(ActionEvent e) {
-//
-//        if(e.getSource() == open) {
-//
-//            JFileChooser file = new JFileChooser();
-//
-//            file.showOpenDialog(null);
-//        }
-//    }
+    }
 }
 
 
