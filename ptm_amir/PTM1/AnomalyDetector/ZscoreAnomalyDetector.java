@@ -1,5 +1,6 @@
 package PTM1.AnomalyDetector;
 
+import PTM1.Helpclass.Point;
 import PTM1.Helpclass.StatLib;
 import PTM1.Helpclass.TimeSeries;
 
@@ -11,7 +12,9 @@ import java.util.List;
 public class ZscoreAnomalyDetector implements TimeSeriesAnomalyDetector {
 
    private HashMap<String,Float> zscoremap=new HashMap<String,Float>(); 
-
+    public HashMap<String,List<Point[]>> to_paint_map = new HashMap<>();
+   
+    
     public float MaxcheckZScore(float[] curColToCheck){
         ArrayList<Float> curArrayList=new ArrayList<>();
         float  curZscore=0, maxZscore=0;
@@ -75,6 +78,25 @@ public class ZscoreAnomalyDetector implements TimeSeriesAnomalyDetector {
             }
         }
         return anomalyReportList;
+    }
+
+
+    @Override
+    public HashMap<String,List<Point[]>> paint(TimeSeries ts) {
+        float[] feature_to_point;
+        String[] features=ts.FeaturesList();
+        HashMap<String,List<Point[]>> paint_map=new HashMap<>();
+        List<Point> point_per_f_list = new LinkedList<>();
+        List<Point[]> point_list = new LinkedList<>();
+        for(int i=0;i< ts.getHashMap().size();i++){
+            feature_to_point= ts.getHashMap().get(features[i]);
+            for(int j=0;j<ts.getSizeOfVector();j++){
+                point_per_f_list.add(new Point((float)j,feature_to_point[j]));
+            }
+            point_list.add(point_per_f_list.toArray(new Point[0]));
+            paint_map.put(features[i],point_list );
+        }
+        return paint_map;
     }
 
 }

@@ -21,7 +21,6 @@ public class ViewModel implements Observer {
 
     // To Do: attach video slider to timestep : timestep.bind(video_timestep)
     int time_step;
-
     TimeSeries timeSeries;
     TimeSeriesAnomalyDetector anomalyDetector;
 
@@ -65,7 +64,7 @@ public class ViewModel implements Observer {
         heading.addListener((o,val,newval)->model.setHeading((float)newval));
 
     }
-
+    
     /*
     Here we want to get the specific algorithm from the user,
     and afterwards update that value in the model,
@@ -88,15 +87,17 @@ public class ViewModel implements Observer {
             });
             Class<?> c = urlClassLoader.loadClass(className);
             TimeSeriesAnomalyDetector Ts = (TimeSeriesAnomalyDetector) c.newInstance();
-            this.anomalyDetector= Ts;
+            this.model.setAnomalyDetevtor(Ts);
         }catch (Exception e){
             e.printStackTrace();
         }
 
     }
 
+    //ברגע שמודל משתנה צריך לבדוק אם יש לו נתוני טיסה אלגוריתם ושם של הגדרה
     @Override
     public void update(Observable o, Object arg) {
 
     }
+    
 }

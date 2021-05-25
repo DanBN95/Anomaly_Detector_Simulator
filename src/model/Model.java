@@ -25,6 +25,9 @@ public class Model extends Observable implements Controller {
     UserSettings userSettings;
     Socket fg;
 
+    //יקבל נקודות אם אפשר לצייר
+    List<float[]> to_paint;
+
 
     public Model(String settings) {
 
@@ -34,6 +37,7 @@ public class Model extends Observable implements Controller {
         userSettings = desrializeFromXML(settings);
 
     }
+
 
     public void csvToFg(TimeSeries ts) {
     /*

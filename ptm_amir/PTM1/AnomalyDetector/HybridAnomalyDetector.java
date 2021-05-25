@@ -14,7 +14,7 @@ public class HybridAnomalyDetector implements TimeSeriesAnomalyDetector {
     HashMap<String,LineCorrelatedFeatures> LinecorrelatedFeaturesList = new HashMap<>();
     HashMap<String,CircleCorrelatedFeatures> CirclecorrelatedFeaturesList = new HashMap<>();
     private HashMap<String,Float> zscoremap=new HashMap<String,Float>(); 
-
+    HashMap<String,String> best_corlation_couples = new HashMap<>();
 
     @Override
     public void learnNormal(TimeSeries ts) {
@@ -39,9 +39,11 @@ public class HybridAnomalyDetector implements TimeSeriesAnomalyDetector {
                     save_through_feature = through_feature;
                 }
             }
-
+            this.best_corlation_couples.put(feature_check, save_through_feature);
             //ues linear regration
             if (best_correlated >= 0.95) {
+                
+			    if(best_corlation_couples.containsKey(save_through_feature)){continue;}
                 Point[] p = new Point[ts.getSizeOfVector()];
                 for (int k = 0; k < ts.getSizeOfVector(); k++)
                     p[k] = new Point(ts.valueAtIndex(k, feature_check), ts.valueAtIndex(k, save_through_feature));
@@ -59,6 +61,7 @@ public class HybridAnomalyDetector implements TimeSeriesAnomalyDetector {
 
 
             } else if (best_correlated < 0.5) {
+                
                 Vector<Float> curArrayList = new Vector<Float>();
                 float curAvg = 0, curStiya = 0, curZscore = 0, maxZscore = 0;
                 Float[] curArray = null;
@@ -85,6 +88,7 @@ public class HybridAnomalyDetector implements TimeSeriesAnomalyDetector {
 
 
             } else {
+			    if(best_corlation_couples.containsKey(save_through_feature)){continue;}
                 Vector<Point> point_for_cercle = new Vector<>();
                 //otherwise circle
                 for (int t = 0; t < v_check.length; t++) {
@@ -157,6 +161,30 @@ public class HybridAnomalyDetector implements TimeSeriesAnomalyDetector {
 
 
 
+    }
+
+    @Override
+    public HashMap<String,List<Point[]>> paint(TimeSeries ts) {
+        float[] feature_to_point1,feature_to_point2;
+        String[] features=ts.FeaturesList();
+        HashMap<String,List<Point[]>> paint_map=new HashMap<>();
+        List<Point> point_per_f_list = new LinkedList<>();
+		List<Point> point_best_cor_list = new LinkedList<>();
+        List<Point[]> point_list = new LinkedList<>();
+		
+        for(int i=0;i< ts.getHashMap().size();i++){
+            feature_to_point1= ts.getHashMap().get(features[i]);
+			String best_cor = this.best_corlation_couples.get(features[i]);
+			feature_to_point2 = ts.getHashMap().get(best_cor);
+			for(int j=0;j<ts.getSizeOfVector();j++){
+				point_per_f_list.add(new Point((float)j,feature_to_point1[j]));
+                point_best_cor_list.add(new Point(feature_to_point2[j],feature_to_point1[j]));
+            }
+            point_list.add(point_per_f_list.toArray(new Point[0]));
+			point_list.add(point_best_cor_list.toArray(new Point[0]));
+            paint_map.put(features[i],point_list );
+        }
+        return paint_map;
     }
 
 
