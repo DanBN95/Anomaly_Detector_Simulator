@@ -1,6 +1,7 @@
 package model;
 
 import PTM1.AnomalyDetector.TimeSeriesAnomalyDetector;
+import PTM1.Helpclass.Point;
 import javafx.beans.InvalidationListener;
 import sample.Properties;
 import sample.UserSettings;
@@ -15,6 +16,8 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Observable;
 
 public class Model extends Observable implements Controller {
@@ -24,7 +27,7 @@ public class Model extends Observable implements Controller {
     PrintWriter out2fg;
     UserSettings userSettings;
     Socket fg;
-
+    HashMap<String, List<Point[]>> paint_map;
 
     public Model(String settings) {
 

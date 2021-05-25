@@ -1,5 +1,6 @@
 package PTM1.AnomalyDetector;
 
+import PTM1.Helpclass.Point;
 import PTM1.Helpclass.StatLib;
 import PTM1.Helpclass.TimeSeries;
 
@@ -11,25 +12,34 @@ import java.util.List;
 public class ZscoreAnomalyDetector implements TimeSeriesAnomalyDetector {
 
     private HashMap<String,Float> zscoremap=new HashMap<String,Float>();
+    public HashMap<String,List<Point[]>> to_paint_map = new HashMap<>();
+
 
     public float MaxcheckZScore(float[] curColToCheck){
         ArrayList<Float> curArrayList=new ArrayList<>();
-        float curAvg=0, curStiya=0, curZscore=0, maxZscore=0;
+        float  curZscore=0, maxZscore=0;
         Float[] curArray;
         curArrayList.add(curColToCheck[0]);
         for (int j=1;j<curColToCheck.length;j++) {
             curArray = curArrayList.toArray(new Float[0]);
-            curStiya= (float) Math.sqrt(StatLib.var(curArray));
-
+            curZscore= checkZScore(curColToCheck[j],curArray);
             curArrayList.add(curColToCheck[j]);
-            if(curStiya==0){continue; }
-            curAvg=StatLib.avg(curArray);
-            curZscore=Math.abs(curColToCheck[j]-curAvg)/curStiya;
             if(curZscore>maxZscore){
                 maxZscore=curZscore;
             }
         }
         return maxZscore;
+    }
+
+
+    public float checkZScore(float num,Float[] curColToCheck){
+        float curAvg=0, curStiya=0, curZscore=0;
+        curStiya= (float) Math.sqrt(StatLib.var(curColToCheck));
+        if(curStiya==0){return 0; }
+        curAvg=StatLib.avg(curColToCheck);
+        curZscore=Math.abs(num-curAvg)/curStiya;
+        return curZscore;
+
     }
 
 
@@ -59,19 +69,34 @@ public class ZscoreAnomalyDetector implements TimeSeriesAnomalyDetector {
             curArrayList.add(curColToCheck[0]);
             for (int i = 1; i < hashSize; i++) {
                 //find the the z score and comper to the high z score
-                curArray = curArrayList.toArray(new Float[0]);
-                curStiya= (float) Math.sqrt(StatLib.var(curArray));
+                curArray=curArrayList.toArray(new Float[0]);
+                curZscore=checkZScore(curColToCheck[i], curArray);
                 curArrayList.add(curColToCheck[i]);
-                if(curStiya==0){continue;}
-                curAvg=StatLib.avg(curArray);
-                curZscore=Math.abs(ts.valueAtIndex(i, features[j])-curAvg)/curStiya;
-                if ( curZscore >= this.zscoremap.get(features[j])) {
+                if ( curZscore > this.zscoremap.get(features[j])) {
                     anomalyReportList.add(new AnomalyReport("division in col " + features[j], (long) i + 1));
                 }
             }
         }
-        curAvg=0;
-            return anomalyReportList;
+        return anomalyReportList;
+    }
+
+
+    @Override
+    public HashMap<String,List<Point[]>> paint(TimeSeries ts) {
+        float[] feature_to_point;
+        String[] features=ts.FeaturesList();
+        HashMap<String,List<Point[]>> paint_map=new HashMap<>();
+        List<Point> point_per_f_list = new LinkedList<>();
+        List<Point[]> point_list = new LinkedList<>();
+        for(int i=0;i< ts.getHashMap().size();i++){
+            feature_to_point= ts.getHashMap().get(features[i]);
+            for(int j=0;j<ts.getSizeOfVector();j++){
+                point_per_f_list.add(new Point((float)j,feature_to_point[j]));
+            }
+            point_list.add(point_per_f_list.toArray(new Point[0]));
+            paint_map.put(features[i],point_list );
+        }
+        return paint_map;
     }
 
 }
