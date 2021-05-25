@@ -54,28 +54,7 @@ public class ViewModel implements Observer {
     so when the getPaint() func is activated ==> we just need to use
     anomaly detector interface's functions.
      */
-    public void LoadAlgo() {
-        //need to deal with exceptions
-        String input,className;
-        System.out.println("enter a class directory");
-        try {
-            BufferedReader in=new BufferedReader(new InputStreamReader(System.in));
-            input=in.readLine(); // get user input
-            System.out.println("enter the class name");
-            className=in.readLine();
-            in.close();
-// load class directory
-            URLClassLoader urlClassLoader = URLClassLoader.newInstance(new URL[] {
-                    new URL("file://"+input)
-            });
-            Class<?> c = urlClassLoader.loadClass(className);
-            TimeSeriesAnomalyDetector Ts = (TimeSeriesAnomalyDetector) c.newInstance();
-            this.anomalyDetector= Ts;
-        }catch (Exception e){
-            e.printStackTrace();
-        }
 
-    }
 
 
     /*
@@ -110,5 +89,13 @@ public class ViewModel implements Observer {
     @Override
     public void update(Observable o, Object arg) {
 
+    }
+
+    public TimeSeriesAnomalyDetector getAnomalyDetector() {
+        return anomalyDetector;
+    }
+
+    public void setAnomalyDetector(TimeSeriesAnomalyDetector anomalyDetector) {
+        this.model.setAnomalyDetevtor(anomalyDetector);
     }
 }

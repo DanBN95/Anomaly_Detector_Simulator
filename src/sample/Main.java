@@ -17,10 +17,13 @@ import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
+import java.io.File;
+
 public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
+
         // create a AnchorPane
         FXMLLoader fxl = new FXMLLoader();
         AnchorPane root = (AnchorPane) fxl.load(getClass().getResource("sample.fxml").openStream());
@@ -37,6 +40,7 @@ public class Main extends Application {
 
 
     public static void main(String[] args) {
+
         launch(args);
     }
 }
