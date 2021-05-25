@@ -43,23 +43,26 @@ public class Model extends Observable implements Controller {
     thank to the playback_small file
      */
         System.out.println("csvToFg");
-//        try {
-//            String line;
-//            InetAddress ia = InetAddress.getByName(userSettings.getIp());
-//            System.out.println(userSettings.getIp());
-//            fg = new Socket(userSettings.getIp(), Integer.parseInt(userSettings.getPort()));
-//            out2fg = new PrintWriter(fg.getOutputStream());
-////            for(int i=1; i<ts.getNumOfFeatures(); i++) {
-////                line = Arrays.toString(ts.row_array(i));
-////                out2fg.println(Arrays.toString(ts.row_array(i)));
-////            }
-//
-//
-//        } catch (UnknownHostException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        try {
+            String line;
+            InetAddress ia = InetAddress.getByName(userSettings.getIp());
+            int port = Integer.parseInt(userSettings.getPort());
+            System.out.println("The Ip String is: " + userSettings.getIp());
+            System.out.println("The ip inetAdress format is: " + ia);
+            System.out.println("Port number is: " + port);
+            fg = new Socket(ia, port);
+            out2fg = new PrintWriter(fg.getOutputStream());
+//            for(int i=1; i<ts.getNumOfFeatures(); i++) {
+//                line = Arrays.toString(ts.row_array(i));
+//                out2fg.println(Arrays.toString(ts.row_array(i)));
+//            }
+
+
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void setSettings(UserSettings settings) {
