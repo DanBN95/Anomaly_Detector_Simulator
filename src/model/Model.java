@@ -37,7 +37,7 @@ public class Model extends Observable implements Controller {
         userSettings = desrializeFromXML(settings);
 
     }
-
+    //
     public void csvToFg(TimeSeries ts) {
     /*
     suppose to take the timeseries, connecting to fg,
