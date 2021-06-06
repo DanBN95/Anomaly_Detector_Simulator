@@ -17,6 +17,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Observable;
 
 public class Model extends Observable implements Controller {
@@ -37,8 +38,6 @@ public class Model extends Observable implements Controller {
         serializeToXML(userSettings,settings);
         userSettings = desrializeFromXML(settings);
         this.timestep = new SimpleIntegerProperty();
-
-
     }
 
     public void csvToFg(TimeSeries ts) {

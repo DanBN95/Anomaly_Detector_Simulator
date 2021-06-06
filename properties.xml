@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<java version="16.0.1" class="java.beans.XMLDecoder">
+<java version="15.0.1" class="java.beans.XMLDecoder">
  <object class="sample.UserSettings">
   <void property="aileron">
    <string>/controls/flight/aileron[0]</string>
