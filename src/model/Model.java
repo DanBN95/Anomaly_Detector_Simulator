@@ -2,6 +2,8 @@ package model;
 
 import PTM1.AnomalyDetector.TimeSeriesAnomalyDetector;
 import javafx.beans.InvalidationListener;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import sample.Properties;
 import sample.UserSettings;
 
@@ -24,6 +26,7 @@ public class Model extends Observable implements Controller {
     PrintWriter out2fg;
     UserSettings userSettings;
     Socket fg;
+    public IntegerProperty timestep;
 
 
     public Model(String settings) {
@@ -32,6 +35,8 @@ public class Model extends Observable implements Controller {
         setSettings(userSettings);
         serializeToXML(userSettings,settings);
         userSettings = desrializeFromXML(settings);
+        this.timestep = new SimpleIntegerProperty();
+
 
     }
 
