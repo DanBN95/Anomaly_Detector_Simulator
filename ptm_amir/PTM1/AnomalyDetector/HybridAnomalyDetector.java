@@ -164,28 +164,31 @@ public class HybridAnomalyDetector implements TimeSeriesAnomalyDetector {
     }
 
     @Override
-    public HashMap<String,List<Point[]>> paint(TimeSeries ts) {
-        float[] feature_to_point1,feature_to_point2;
-        String[] features=ts.FeaturesList();
-        HashMap<String,List<Point[]>> paint_map=new HashMap<>();
-        List<Point> point_per_f_list = new LinkedList<>();
-        List<Point> point_best_cor_list = new LinkedList<>();
-        List<Point[]> point_list = new LinkedList<>();
+    public HashMap<String,String> paint(TimeSeries ts) {
 
-        for(int i=0;i< ts.getHashMap().size();i++){
-            feature_to_point1= ts.getHashMap().get(features[i]);
-            String best_cor = this.best_corlation_couples.get(features[i]);
-            feature_to_point2 = ts.getHashMap().get(best_cor);
-            for(int j=0;j<ts.getSizeOfVector();j++){
-                point_per_f_list.add(new Point((float)j,feature_to_point1[j]));
-                point_per_f_list.add(new Point((float)j,feature_to_point2[j]));
-                point_best_cor_list.add(new Point(feature_to_point2[j],feature_to_point1[j]));
-            }
-            point_list.add(point_per_f_list.toArray(new Point[0]));
-            point_list.add(point_best_cor_list.toArray(new Point[0]));
-            paint_map.put(features[i],point_list );
-        }
-        return paint_map;
+        return this.best_corlation_couples;
+
+//        float[] feature_to_point1,feature_to_point2;
+//        String[] features=ts.FeaturesList();
+//        HashMap<String,List<Point[]>> paint_map=new HashMap<>();
+//        List<Point> point_per_f_list = new LinkedList<>();
+//        List<Point> point_best_cor_list = new LinkedList<>();
+//        List<Point[]> point_list = new LinkedList<>();
+//
+//        for(int i=0;i< ts.getHashMap().size();i++){
+//            feature_to_point1= ts.getHashMap().get(features[i]);
+//            String best_cor = this.best_corlation_couples.get(features[i]);
+//            feature_to_point2 = ts.getHashMap().get(best_cor);
+//            for(int j=0;j<ts.getSizeOfVector();j++){
+//                point_per_f_list.add(new Point((float)j,feature_to_point1[j]));
+//                point_per_f_list.add(new Point((float)j,feature_to_point2[j]));
+//                point_best_cor_list.add(new Point(feature_to_point2[j],feature_to_point1[j]));
+//            }
+//            point_list.add(point_per_f_list.toArray(new Point[0]));
+//            point_list.add(point_best_cor_list.toArray(new Point[0]));
+//            paint_map.put(features[i],point_list );
+//        }
+//        return paint_map;
     }
 
 

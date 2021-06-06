@@ -30,7 +30,7 @@ public class Model extends Observable implements Controller {
     PrintWriter out2fg;
     UserSettings userSettings;
     Socket fg;
-    HashMap<String, List<Point[]>> paint_map;
+    HashMap<String, String> paint_map;
 
     public Model(String settings) {
 
@@ -253,12 +253,7 @@ public class Model extends Observable implements Controller {
     public void stop() {
 
     }
-    public List<Point[]> getpointmap(String feature){
 
-        return this.paint_map.get(feature);
-
-
-    }
 
 
     //add start to anomlydetector to start search detector
