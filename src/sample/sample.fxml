@@ -71,11 +71,11 @@
                     <Font name="Arial Black" size="20.0" />
                 </font>
             </Text>
-            <MenuButton fx:id="choose_Algo" layoutX="31.0" layoutY="46.0" mnemonicParsing="false" text="Choose Algorithm">
+            <MenuButton fx:id="choose_Algo" layoutX="31.0" layoutY="46.0" mnemonicParsing="false" onAction="#LoadAlgo" text="Choose Algorithm">
                 <items>
-                    <MenuItem mnemonicParsing="false" text="Algorithm Zscore" />
-                    <MenuItem mnemonicParsing="false" text="Algorithm Linear regression" />
-                    <MenuItem mnemonicParsing="false" text="Algorithm Hybrid" />
+                    <MenuItem fx:id="Zscore" mnemonicParsing="false" onAction="#LoadAlgo" text="Algorithm Zscore" />
+                    <MenuItem fx:id="Linereg" mnemonicParsing="false" onAction="#LoadAlgo" text="Algorithm Linear regression" />
+                    <MenuItem fx:id="Hybrid" mnemonicParsing="false" onAction="#LoadAlgo" text="Algorithm Hybrid" />
                 </items>
             </MenuButton>
         </AnchorPane>

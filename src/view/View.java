@@ -1,7 +1,6 @@
 package view;
 import PTM1.AnomalyDetector.TimeSeriesAnomalyDetector;
-import javafx.beans.property.FloatProperty;
-import javafx.beans.property.SimpleFloatProperty;
+import javafx.beans.property.*;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -47,6 +46,10 @@ public class View {
     ViewModel vm;
     double mx, my;
     FloatProperty aileron, elevator, altitude, airSpeed, heading;
+    StringProperty selected_feature;
+
+
+
 
     public View() {
         aileron = new SimpleFloatProperty();
@@ -54,6 +57,8 @@ public class View {
         altitude = new SimpleFloatProperty();
         airSpeed = new SimpleFloatProperty();
         heading = new SimpleFloatProperty();
+        selected_feature = new SimpleStringProperty();
+
     }
 
 
@@ -66,6 +71,11 @@ public class View {
         vm.altitude.bind(altitude);
         vm.airSpeed.bind(airSpeed);
         vm.heading.bind(heading);
+
+        selected_feature.addListener(((o,val,newval)->this.vm.setSelected_feature((String)newval)));
+
+
+
 
 
     }
@@ -80,6 +90,18 @@ public class View {
 
     }
 
+    public void paint_2G(){
+        //הפונקציות של הדר
+
+
+    }
+
+    public void getPaintFunc(){
+
+        vm.getpainter();
+
+
+    }
         /*
             1. create an EventListner that updating the video scroll bar
             (the timestep on vm change according to it by binding)

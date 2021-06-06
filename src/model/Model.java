@@ -23,6 +23,9 @@ import java.util.Observable;
 public class Model extends Observable implements Controller {
 
     TimeSeries timeSeries;
+
+
+
     TimeSeriesAnomalyDetector anomalyDetector;
     PrintWriter out2fg;
     UserSettings userSettings;
@@ -42,7 +45,7 @@ public class Model extends Observable implements Controller {
     /*
     suppose to take the timeseries, connecting to fg,
     read line by line from the csv file in the ts values separated by comma(','),
-    and for every value the fg put it in the right place
+    and for every value the fg put it in the right placee
     thank to the playback_small file
      */
         System.out.println("csvToFg");
@@ -53,8 +56,8 @@ public class Model extends Observable implements Controller {
             System.out.println("The Ip String is: " + userSettings.getIp());
             System.out.println("The ip inetAdress format is: " + ia);
             System.out.println("Port number is: " + port);
-            fg = new Socket(ia, port);
-            out2fg = new PrintWriter(fg.getOutputStream());
+            //fg = new Socket("localhost", port);
+            out2fg = new PrintWriter(System.out);
 //            for(int i=1; i<ts.getNumOfFeatures(); i++) {
 //                line = Arrays.toString(ts.row_array(i));
 //                out2fg.println(Arrays.toString(ts.row_array(i)));
@@ -209,15 +212,32 @@ public class Model extends Observable implements Controller {
         }
     }
 
-
+    public TimeSeriesAnomalyDetector getAnomalyDetector() {
+        return anomalyDetector;
+    }
     public void setAnomalyDetevtor(TimeSeriesAnomalyDetector ad ){
         this.anomalyDetector=ad;
+        if(this.timeSeries!=null){
+            this.anomalyDetector.learnNormal(this.timeSeries);
+            this.anomalyDetector.detect(this.timeSeries);
+            this.paint_map= this.anomalyDetector.paint(this.timeSeries);
+        }
+
+
     }
 
 
     // Projection Functions:
     @Override
-    public void setTimeSeries(TimeSeries ts) { this.timeSeries = ts; }
+    public void setTimeSeries(TimeSeries ts) {
+        this.timeSeries = ts;
+
+        if(this.anomalyDetector!=null){
+            this.anomalyDetector.learnNormal(this.timeSeries);
+            this.anomalyDetector.detect(this.timeSeries);
+            this.paint_map= this.anomalyDetector.paint(this.timeSeries);
+        }
+    }
 
     @Override
     public void play(int start, int rate) {
@@ -233,7 +253,12 @@ public class Model extends Observable implements Controller {
     public void stop() {
 
     }
+    public List<Point[]> getpointmap(String feature){
 
+        return this.paint_map.get(feature);
+
+
+    }
 
 
     //add start to anomlydetector to start search detector

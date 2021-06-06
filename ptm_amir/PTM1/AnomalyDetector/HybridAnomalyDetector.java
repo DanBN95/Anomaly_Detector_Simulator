@@ -178,6 +178,7 @@ public class HybridAnomalyDetector implements TimeSeriesAnomalyDetector {
             feature_to_point2 = ts.getHashMap().get(best_cor);
             for(int j=0;j<ts.getSizeOfVector();j++){
                 point_per_f_list.add(new Point((float)j,feature_to_point1[j]));
+                point_per_f_list.add(new Point((float)j,feature_to_point2[j]));
                 point_best_cor_list.add(new Point(feature_to_point2[j],feature_to_point1[j]));
             }
             point_list.add(point_per_f_list.toArray(new Point[0]));

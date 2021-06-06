@@ -82,7 +82,7 @@ public class ZscoreAnomalyDetector implements TimeSeriesAnomalyDetector {
 
 
     @Override
-    public HashMap<String,List<Point[]>> paint(TimeSeries ts) {
+    public HashMap<String,List<Point[]>> paint(TimeSeries ts,String feature) {
         float[] feature_to_point;
         String[] features=ts.FeaturesList();
         HashMap<String,List<Point[]>> paint_map=new HashMap<>();
