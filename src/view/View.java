@@ -1,22 +1,26 @@
 package view;
+
 import PTM1.AnomalyDetector.TimeSeriesAnomalyDetector;
 import javafx.beans.property.*;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+
+import javafx.beans.property.FloatProperty;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleFloatProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.input.MouseEvent;
 
 import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import view.open.OpenController;
-import view.open.OpenDisplay;
+
 import view_model.ViewModel;
-
-import javax.swing.*;
-
 
 import java.awt.*;
 import java.awt.event.ActionListener;
@@ -28,36 +32,58 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLClassLoader;
 
+import java.io.File;
+
+
+
 
 public class View {
 
 
-    @FXML
-    MenuItem algo;
-    @FXML
-    Canvas joystick;
-    @FXML
-    Slider rudder, throttle;
-    @FXML
-    Button open;
+        @FXML
+        Canvas joystick;
+        @FXML
+        Slider rudder,throttle;
+        @FXML
+        Button open;
+        @FXML
+        Slider slider;
 //        @FXML
 //        OpenDisplay openDisplay;
 
-    ViewModel vm;
-    double mx, my;
-    FloatProperty aileron, elevator, altitude, airSpeed, heading;
-    StringProperty selected_feature;
+        ViewModel vm;
+        boolean mousePushed;
+        double mx,my;
+        FloatProperty aileron,elevator,altitude,airSpeed,heading;
+        IntegerProperty time_step;
+        StringProperty selected_feature;
+
+        public View () {
+            aileron = new SimpleFloatProperty();
+            elevator = new SimpleFloatProperty();
+            altitude = new SimpleFloatProperty();
+            airSpeed = new SimpleFloatProperty();
+            heading = new SimpleFloatProperty();
+            time_step = new SimpleIntegerProperty();
+            selected_feature = new SimpleStringProperty();
+        }
 
 
+        public void init(ViewModel vm) {
+            this.vm = vm;
+            this.rudder.valueProperty().bind(vm.rudder);
+            this.throttle.valueProperty().bind(vm.throttle);
+            this.aileron.bind(vm.aileron);
+            this.elevator.bind(vm.elevator);
+            this.altitude.bind(vm.altitude);
+            this.airSpeed.bind(vm.airSpeed);
+            this.heading.bind(vm.heading);
+            this.time_step.set(0);
 
+            paint();
+            //System.out.println(openDisplay.file.getName());
+            //vm.setTimeSeries(openDisplay.file);
 
-    public View() {
-        aileron = new SimpleFloatProperty();
-        elevator = new SimpleFloatProperty();
-        altitude = new SimpleFloatProperty();
-        airSpeed = new SimpleFloatProperty();
-        heading = new SimpleFloatProperty();
-        selected_feature = new SimpleStringProperty();
 
     }
 
@@ -103,19 +129,34 @@ public class View {
 
     }
         /*
-            1. create an EventListner that updating the video scroll bar
+            1. create an EventListener that updating the video scroll bar
             (the timestep on vm change according to it by binding)
          */
 
         /*
-            2. EventListner that after selecting one of the csv feature,its updating
+            2. EventListener that after selecting one of the csv feature,its updating
             the vm to active paint function
          */
 
         /*
-            3. EventListner that after algorithm has been selected, updating
+            3. EventListener that after algorithm has been selected, updating
             the vm which algorithm to be active
         */
+
+
+        public  void mouseDown(MouseEvent me) {
+            if(!mousePushed) {
+                mousePushed = true;
+                System.out.println("mouse is down");
+            }
+        }
+
+        public  void mouseUp(MouseEvent me) {
+            if(!mousePushed) {
+                mousePushed = false;
+                System.out.println("mouse is down");
+            }
+        }
 
 
     public void openBtnPreesed() {
@@ -171,6 +212,15 @@ public class View {
         }
 
     }
+
+
+    public void changeTimeStep(MouseEvent mouseEvent) {
+        System.out.println("time step has changed");
+        this.time_step.set((int) slider.getValue());
+        System.out.println(this.time_step);
+    }
+
+
 }
 
 

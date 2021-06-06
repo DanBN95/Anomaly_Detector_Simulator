@@ -25,6 +25,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception{
 
         // create a AnchorPane
+            System.out.println("Application started");
         FXMLLoader fxl = new FXMLLoader();
         AnchorPane root = (AnchorPane) fxl.load(getClass().getResource("sample.fxml").openStream());
         Scene scene = new Scene(root);

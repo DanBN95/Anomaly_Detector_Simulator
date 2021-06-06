@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$/../Anomaly_Detector_Simulator">
+      <sourceFolder url="file://$MODULE_DIR$/../Anomaly_Detector_Simulator/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../Anomaly_Detector_Simulator/ptm_amir" isTestSource="false" />
+    </content>
+    <orderEntry type="jdk" jdkName="15" jdkType="JavaSDK" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="lib" level="project" />
+  </component>
+</module>

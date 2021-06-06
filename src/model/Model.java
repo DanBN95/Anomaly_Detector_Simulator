@@ -1,8 +1,9 @@
 package model;
 
 import PTM1.AnomalyDetector.TimeSeriesAnomalyDetector;
-import PTM1.Helpclass.Point;
 import javafx.beans.InvalidationListener;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import sample.Properties;
 import sample.UserSettings;
 
@@ -16,21 +17,18 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Observable;
 
 public class Model extends Observable implements Controller {
 
     TimeSeries timeSeries;
-
-
-
     TimeSeriesAnomalyDetector anomalyDetector;
     PrintWriter out2fg;
     UserSettings userSettings;
     Socket fg;
     HashMap<String, String> paint_map;
+
+    public IntegerProperty timestep;
 
     public Model(String settings) {
 
@@ -38,9 +36,11 @@ public class Model extends Observable implements Controller {
         setSettings(userSettings);
         serializeToXML(userSettings,settings);
         userSettings = desrializeFromXML(settings);
+        this.timestep = new SimpleIntegerProperty();
+
 
     }
-    //
+
     public void csvToFg(TimeSeries ts) {
     /*
     suppose to take the timeseries, connecting to fg,
@@ -48,27 +48,26 @@ public class Model extends Observable implements Controller {
     and for every value the fg put it in the right placee
     thank to the playback_small file
      */
-        System.out.println("csvToFg");
-        try {
-            String line;
-            InetAddress ia = InetAddress.getByName(userSettings.getIp());
-            int port = Integer.parseInt(userSettings.getPort());
-            System.out.println("The Ip String is: " + userSettings.getIp());
-            System.out.println("The ip inetAdress format is: " + ia);
-            System.out.println("Port number is: " + port);
-            //fg = new Socket("localhost", port);
-            out2fg = new PrintWriter(System.out);
-//            for(int i=1; i<ts.getNumOfFeatures(); i++) {
-//                line = Arrays.toString(ts.row_array(i));
-//                out2fg.println(Arrays.toString(ts.row_array(i)));
-//            }
 
+            System.out.println("csvToFg");
+//        try {
+//            String line;
+//            InetAddress ia = InetAddress.getByName(userSettings.getIp());
+//            System.out.println(userSettings.getIp());
+//            fg = new Socket(userSettings.getIp(), Integer.parseInt(userSettings.getPort()));
+//            out2fg = new PrintWriter(fg.getOutputStream());
+////            for(int i=1; i<ts.getNumOfFeatures(); i++) {
+////                line = Arrays.toString(ts.row_array(i));
+////                out2fg.println(Arrays.toString(ts.row_array(i)));
+////            }
+//
+//
+//        } catch (UnknownHostException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     public void setSettings(UserSettings settings) {
