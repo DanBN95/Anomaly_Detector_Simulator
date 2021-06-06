@@ -26,8 +26,9 @@ public class Model extends Observable implements Controller {
     PrintWriter out2fg;
     UserSettings userSettings;
     Socket fg;
-    public IntegerProperty timestep;
+    HashMap<String, String> paint_map;
 
+    public IntegerProperty timestep;
 
     public Model(String settings) {
 
@@ -44,9 +45,10 @@ public class Model extends Observable implements Controller {
     /*
     suppose to take the timeseries, connecting to fg,
     read line by line from the csv file in the ts values separated by comma(','),
-    and for every value the fg put it in the right place
+    and for every value the fg put it in the right placee
     thank to the playback_small file
      */
+
             System.out.println("csvToFg");
 //        try {
 //            String line;
@@ -65,6 +67,7 @@ public class Model extends Observable implements Controller {
 //        } catch (IOException e) {
 //            e.printStackTrace();
 //        }
+
     }
 
     public void setSettings(UserSettings settings) {
@@ -208,15 +211,32 @@ public class Model extends Observable implements Controller {
         }
     }
 
-
+    public TimeSeriesAnomalyDetector getAnomalyDetector() {
+        return anomalyDetector;
+    }
     public void setAnomalyDetevtor(TimeSeriesAnomalyDetector ad ){
         this.anomalyDetector=ad;
+        if(this.timeSeries!=null){
+            this.anomalyDetector.learnNormal(this.timeSeries);
+            this.anomalyDetector.detect(this.timeSeries);
+            this.paint_map= this.anomalyDetector.paint(this.timeSeries);
+        }
+
+
     }
 
 
     // Projection Functions:
     @Override
-    public void setTimeSeries(TimeSeries ts) { this.timeSeries = ts; }
+    public void setTimeSeries(TimeSeries ts) {
+        this.timeSeries = ts;
+
+        if(this.anomalyDetector!=null){
+            this.anomalyDetector.learnNormal(this.timeSeries);
+            this.anomalyDetector.detect(this.timeSeries);
+            this.paint_map= this.anomalyDetector.paint(this.timeSeries);
+        }
+    }
 
     @Override
     public void play(int start, int rate) {

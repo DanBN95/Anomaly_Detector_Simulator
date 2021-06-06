@@ -2,11 +2,16 @@ package view_model;
 
 
 import PTM1.AnomalyDetector.TimeSeriesAnomalyDetector;
+import PTM1.Helpclass.Point;
 import PTM1.Helpclass.TimeSeries;
+
+import javafx.beans.property.*;
+
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+
 import model.Model;
 
 
@@ -15,9 +20,12 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
+
 
 public class ViewModel implements Observer {
 
@@ -25,10 +33,10 @@ public class ViewModel implements Observer {
     private HashMap<String,FloatProperty> displayVariables;
     public FloatProperty aileron,elevator,rudder,throttle,altitude,airSpeed,heading;
     public File file;
+    public String selected_feature;
 
     // Attach video slider to timestep : timestep.bind(video_timestep)
     IntegerProperty time_step;
-
     TimeSeries timeSeries;
     TimeSeriesAnomalyDetector anomalyDetector;
 
@@ -48,6 +56,9 @@ public class ViewModel implements Observer {
         altitude = new SimpleFloatProperty();
         airSpeed = new SimpleFloatProperty();
         heading = new SimpleFloatProperty();
+
+        selected_feature = new String();
+
         time_step = new SimpleIntegerProperty();
 
         this.model.timestep.bind(this.time_step);
@@ -66,36 +77,13 @@ public class ViewModel implements Observer {
 
     }
 
-
-
     /*
     Here we want to get the specific algorithm from the user,
     and afterwards update that value in the model,
     so when the getPaint() func is activated ==> we just need to use
     anomaly detector interface's functions.
      */
-    public void LoadAlgo() {
-        //need to deal with exceptions
-        String input,className;
-        System.out.println("enter a class directory");
-        try {
-            BufferedReader in=new BufferedReader(new InputStreamReader(System.in));
-            input=in.readLine(); // get user input
-            System.out.println("enter the class name");
-            className=in.readLine();
-            in.close();
-// load class directory
-            URLClassLoader urlClassLoader = URLClassLoader.newInstance(new URL[] {
-                    new URL("file://"+input)
-            });
-            Class<?> c = urlClassLoader.loadClass(className);
-            TimeSeriesAnomalyDetector Ts = (TimeSeriesAnomalyDetector) c.newInstance();
-            this.anomalyDetector= Ts;
-        }catch (Exception e){
-            e.printStackTrace();
-        }
 
-    }
 
 
     /*
@@ -103,6 +91,9 @@ public class ViewModel implements Observer {
          that in the moment the user load csv file, the View
          deliver the csv to the function in the vm
       */
+
+
+
     public void setTimeSeries(File f) {
         this.file = f;
         this.timeSeries = new TimeSeries(file.getPath());
@@ -110,7 +101,11 @@ public class ViewModel implements Observer {
         model.csvToFg(this.timeSeries);
     }
 
-    public void setTimeStep(int time_step) {
+
+
+
+    public void setSelected_feature(String new_selected_feature ){
+        this.selected_feature=new_selected_feature;
 
         aileron.setValue(timeSeries.valueAtIndex(time_step, "aileron"));
         elevator.setValue(timeSeries.valueAtIndex(time_step, "elevator"));
@@ -121,8 +116,21 @@ public class ViewModel implements Observer {
         heading.setValue(timeSeries.valueAtIndex(time_step, "heading"));
     }
 
+
     @Override
     public void update(Observable o, Object arg) {
 
+    }
+
+    public TimeSeriesAnomalyDetector getAnomalyDetector() {
+        return anomalyDetector;
+    }
+
+    public void setAnomalyDetector(TimeSeriesAnomalyDetector anomalyDetector) {
+        this.model.setAnomalyDetevtor(anomalyDetector);
+    }
+
+    public Runnable getpainter(){
+        return ()->this.model.getAnomalyDetector().paint(this.timeSeries);
     }
 }

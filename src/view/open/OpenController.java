@@ -24,7 +24,7 @@ public class OpenController  {
 
 
     public void openBtnPreesed() {
-        System.out.println("btn pressed");
+        System.out.println("12btn pressed");
         Stage stage = new Stage();
         stage.setTitle("File chooser sample");
 
