@@ -218,7 +218,6 @@ public class Model extends Observable implements Controller {
         if(this.timeSeries!=null){
             this.anomalyDetector.learnNormal(this.timeSeries);
             this.anomalyDetector.detect(this.timeSeries);
-            this.paint_map= this.anomalyDetector.paint(this.timeSeries);
         }
 
 
@@ -233,7 +232,7 @@ public class Model extends Observable implements Controller {
         if(this.anomalyDetector!=null){
             this.anomalyDetector.learnNormal(this.timeSeries);
             this.anomalyDetector.detect(this.timeSeries);
-            this.paint_map= this.anomalyDetector.paint(this.timeSeries);
+
         }
     }
 

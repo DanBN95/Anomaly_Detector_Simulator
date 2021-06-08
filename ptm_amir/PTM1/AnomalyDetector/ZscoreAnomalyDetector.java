@@ -83,7 +83,7 @@ public class ZscoreAnomalyDetector implements TimeSeriesAnomalyDetector {
 
 
     @Override
-    public HashMap<String, String> paint(TimeSeries ts) {
+    public HashMap<String, String> paint(TimeSeries ts,String feature) {
         HashMap<String, String> best_corlation_couples = new HashMap<>();
         float best_correlated = 0;
         String save_through_feature = "";

@@ -5,9 +5,7 @@ import javafx.beans.property.FloatProperty;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
-import model.Model;
-import view.View;
-import view_model.ViewModel;
+
 
 import java.io.IOException;
 

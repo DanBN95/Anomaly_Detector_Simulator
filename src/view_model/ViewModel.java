@@ -120,6 +120,6 @@ public class ViewModel implements Observer {
     }
 
     public Runnable getpainter(){
-        return ()->this.model.getAnomalyDetector().paint(this.timeSeries);
+        return ()->this.model.getAnomalyDetector().paint(this.timeSeries,selected_feature);
     }
 }
