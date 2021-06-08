@@ -16,6 +16,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
+<?import view.pannel.Pannel?>
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.View">
     <SplitPane dividerPositions="0.7359437751004017" orientation="VERTICAL" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="320.0" prefWidth="599.0">
@@ -29,7 +30,6 @@
                     </yAxis>
                 </LineChart>
             </Pane>
-            <ListView fx:id="featuresList" prefHeight="243.0" prefWidth="189.0" AnchorPane.bottomAnchor="37.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="400.0" AnchorPane.topAnchor="10.0" />
             <SplitPane dividerPositions="0.5" layoutX="208.0" layoutY="14.0" prefHeight="100.0" prefWidth="205.0" AnchorPane.topAnchor="10.0">
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                     <LineChart fx:id="LineChart" prefHeight="88.66666666666667" prefWidth="94.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -61,6 +61,8 @@
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0" />
             </SplitPane>
             <Button fx:id="open" layoutX="10.0" layoutY="253.0" mnemonicParsing="false" onAction="#openBtnPreesed" prefHeight="2.0" prefWidth="65.0" text="Open" />
+            <Button fx:id="connect" disable="true" layoutX="74.0" layoutY="253.0" mnemonicParsing="false" onAction="#connectFg" text="Connect" />
+         <ListView fx:id="fList" layoutX="10.0" layoutY="21.0" prefHeight="205.0" prefWidth="182.0" />
         </AnchorPane>
         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="103.0" prefWidth="597.0">
             <Slider fx:id="slider" blockIncrement="100.0" layoutX="10.0" layoutY="69.0" max="2174.0" onMouseClicked="#changeTimeStep" prefHeight="38.0" prefWidth="569.0" showTickLabels="true" showTickMarks="true" />
@@ -73,13 +75,13 @@
             </Text>
 
             <MenuButton fx:id="choose_Algo" layoutX="28.0" layoutY="36.0" mnemonicParsing="false" text="Choose Algorithm">
-
                 <items>
                     <MenuItem fx:id="Zscore" mnemonicParsing="false" onAction="#LoadAlgo" text="Algorithm Zscore" />
                     <MenuItem fx:id="Linereg" mnemonicParsing="false" onAction="#LoadAlgo" text="Algorithm Linear regression" />
                     <MenuItem fx:id="Hybrid" mnemonicParsing="false" onAction="#LoadAlgo" text="Algorithm Hybrid" />
                 </items>
             </MenuButton>
+            <Pannel fx:id="pannel"></Pannel>
         </AnchorPane>
     </SplitPane>
 </AnchorPane>

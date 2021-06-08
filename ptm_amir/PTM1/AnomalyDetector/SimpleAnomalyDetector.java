@@ -83,10 +83,10 @@ public class SimpleAnomalyDetector implements TimeSeriesAnomalyDetector {
 	}
 
 
-	@Override
-	public HashMap<String,String> paint(TimeSeries ts) {
 
-		return best_corlation_couples;
+	public HashMap<String, String> paint(TimeSeries ts) {
+
+		return null;
 		//if(featrue==null){return null;}
 //		float[] feature_to_point1,feature_to_point2;
 //		String[] features=ts.FeaturesList();

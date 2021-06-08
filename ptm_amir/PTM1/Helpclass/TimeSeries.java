@@ -1,6 +1,8 @@
 package PTM1.Helpclass;
 
 import java.io.*;
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
 import java.util.Vector;
@@ -123,18 +125,25 @@ public class TimeSeries {
 		} in.close();
 	}
 
-	//returns row array at index line
-	public float [] row_array (int index) {
-		float [] arr = new float[this.vector_size];
-		for(int i=0;i<this.vector_size;i++)
-			arr[i] = valueAtIndex(index,FeaturesList()[i]);
-		return arr;
+	//returns row array at index line seperated by comma
+	public String row_array (int index) {
+		float [] arr = new float[this.hashMap.size()];
+		String str;
+		for(int i=0;i<this.hashMap.size();i++) {
+			arr[i] = valueAtIndex(index, FeaturesList()[i]);
+		}
+		str = Arrays.toString(arr);
+		return str;
 	}
 
 	//returns the value at the [timeStep][feature_key] index
 	public float valueAtIndex(int timeStep, String feature_key) {
 		return this.hashMap.get(feature_key)[timeStep];
 	}
+	public float valueAtIndex(int timeStep, int feature_index) {
+		return valueAtIndex(timeStep,this.FeaturesList()[feature_index]);
+	}
+
 
 	public void setvalue(String name,int val,int val2){
 		float[] newstr =this.hashMap.get(name);

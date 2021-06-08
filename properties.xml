@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<java version="16.0.1" class="java.beans.XMLDecoder">
+<java version="16" class="java.beans.XMLDecoder">
  <object class="sample.UserSettings">
   <void property="aileron">
-   <string>/controls/flight/aileron[0]</string>
+   <string>set /controls/flight/aileron[0]</string>
   </void>
   <void property="airSpeed">
-   <string>/instrumentation/airspeed-indicator/indicated-speed-kt</string>
+   <string>set /instrumentation/airspeed-indicator/indicated-speed-kt</string>
   </void>
   <void property="altitude">
-   <string>/position/altitude-ft</string>
+   <string>set /position/altitude-ft</string>
   </void>
   <void property="elevator">
-   <string>/controls/flight/elevator</string>
+   <string>set /controls/flight/elevator</string>
   </void>
   <void property="heading">
-   <string>/orientation/heading-deg</string>
+   <string>set /orientation/heading-deg</string>
   </void>
   <void property="ip">
    <string>127.0.0.1</string>
@@ -84,10 +84,10 @@
    </object>
   </void>
   <void property="rudder">
-   <string>/controls/flight/elevator</string>
+   <string>set /controls/flight/elevator</string>
   </void>
   <void property="throttle">
-   <string>/controls/engines/engine[0]/throttle</string>
+   <string>set /controls/engines/engine[0]/throttle</string>
   </void>
  </object>
 </java>
