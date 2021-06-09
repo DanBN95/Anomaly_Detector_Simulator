@@ -54,8 +54,9 @@ public class ViewModel implements Observer {
         this.model.addObserver(this);
 
         displayVariables = this.model.showFields();
-
+        check_settings=new SimpleBooleanProperty();
         check_settings.setValue(true);
+        selected_feature=new SimpleStringProperty();
 
         time_step = new SimpleIntegerProperty();
 

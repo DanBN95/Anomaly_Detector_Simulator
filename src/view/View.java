@@ -51,6 +51,11 @@ import java.util.List;
         @FXML
         ListView<String> fList;
         @FXML
+        private NumberAxis x,x1,algo_x;
+        @FXML
+        private NumberAxis y,y1,algo_y;
+        @FXML
+        private javafx.scene.chart.LineChart<?,?> CorrelatedFeatureLineChart, FeatureLineChart;
 
 //    @FXML
 //    private NumberAxis x,x1,algo_x;
