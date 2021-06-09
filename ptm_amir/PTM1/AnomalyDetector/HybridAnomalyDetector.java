@@ -164,9 +164,10 @@ public class HybridAnomalyDetector implements TimeSeriesAnomalyDetector {
     }
 
     @Override
-    public HashMap<String,String> paint(TimeSeries ts) {
+    public HashMap<String,String> paint(TimeSeries ts,String feature) {
 
         return this.best_corlation_couples;
+
 
 //        float[] feature_to_point1,feature_to_point2;
 //        String[] features=ts.FeaturesList();
