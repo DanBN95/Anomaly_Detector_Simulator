@@ -55,10 +55,14 @@ public class ViewModel implements Observer {
 
         displayVariables = this.model.showFields();
 
+
+        check_settings=new SimpleBooleanProperty();
         check_settings.setValue(true);
 
-        time_step = new SimpleIntegerProperty();
 
+        selected_feature= new SimpleStringProperty();
+
+        time_step = new SimpleIntegerProperty();
         this.model.timestep.bind(this.time_step);
 
         //  When those features are changing, it evoke a change in the model

@@ -3,6 +3,7 @@ package model;
 import PTM1.AnomalyDetector.TimeSeriesAnomalyDetector;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleFloatProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import sample.UserSettings;
 import PTM1.Helpclass.TimeSeries;
 import java.io.*;
@@ -15,7 +16,6 @@ public class Model extends Observable  {
     TimeSeries timeSeries;
     TimeSeriesAnomalyDetector anomalyDetector;
     PrintWriter out2fg;
-    public UserSettings userSettings;
     Socket fg;
     public HashMap<String, ArrayList<Integer>> setting_map;
     int port;
@@ -24,6 +24,7 @@ public class Model extends Observable  {
     public IntegerProperty timestep;
 
     public Model(String settings) {
+        timestep =new SimpleIntegerProperty();
         setSettings(settings);
         // this.userSettings = new UserSettings();
        // serializeToXML(userSettings,settings);
