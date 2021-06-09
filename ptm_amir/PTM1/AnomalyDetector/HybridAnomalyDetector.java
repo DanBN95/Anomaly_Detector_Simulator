@@ -18,170 +18,156 @@ public class HybridAnomalyDetector implements TimeSeriesAnomalyDetector {
 
     @Override
     public void learnNormal(TimeSeries ts) {
+        //find the best correlation
+        float best_correlated = 0, check_correlated = 0;
+        String save_through_feature = "";
+        String[] features = ts.FeaturesList();
+        String feature_check = null;
+        float[] v_check = null;
+        float[] through_v = null;
+
+        for (int i = 0; i < ts.getHashMap().size() - 1; i++) { //for every feature checking cov with the other features
+            feature_check = features[i];
+            v_check = ts.getHashMap().get(feature_check);
+            for (int j = 0; j < ts.getHashMap().size(); j++) {
+                if(i==j){continue;}
+                String through_feature = features[j];
+                through_v = ts.getHashMap().get(through_feature);
+                check_correlated = Math.abs(StatLib.pearson(v_check, through_v));
+                if (check_correlated > best_correlated) {
+                    best_correlated = check_correlated; //set the best cor
+                    save_through_feature = through_feature;
+                }
+            }
+            this.best_corlation_couples.put(feature_check, save_through_feature);
+            //ues linear regration
+            if (best_correlated >= 0.95) {
+
+                if(best_corlation_couples.containsKey(save_through_feature)){continue;}
+                Point[] p = new Point[ts.getSizeOfVector()];
+                for (int k = 0; k < ts.getSizeOfVector(); k++)
+                    p[k] = new Point(ts.valueAtIndex(k, feature_check), ts.valueAtIndex(k, save_through_feature));
+                Line reg_line = StatLib.linear_reg(p);
+                float max_dev = -1;
+                for (Point point : p) {
+                    float result = StatLib.dev(point, reg_line);
+                    if (result > max_dev)
+                        max_dev = result;
+
+                }
+                max_dev *= (float) 1.1;
+                this.LinecorrelatedFeaturesList.put(feature_check, new LineCorrelatedFeatures(feature_check, save_through_feature, best_correlated, reg_line, max_dev));
+                best_correlated = 0;
+
+
+            } else if (best_correlated < 0.5) {
+
+                Vector<Float> curArrayList = new Vector<Float>();
+                float curAvg = 0, curStiya = 0, curZscore = 0, maxZscore = 0;
+                Float[] curArray = null;
+                curStiya = (float) Math.sqrt(StatLib.var(v_check));
+                curArrayList.add(v_check[0]);
+
+                for (int j = 1; j < v_check.length; j++) {
+                    curArray = curArrayList.toArray(new Float[0]);
+                    curStiya = (float) Math.sqrt(StatLib.var(curArray));
+                    curAvg = StatLib.avg(curArray);
+                    curArrayList.add(v_check[j]);
+                    if (curStiya == 0) {
+                        continue;
+                    }
+                    curZscore = Math.abs(v_check[j] - curAvg) / curStiya;
+                    if (curZscore > maxZscore) {
+                        maxZscore = curZscore;
+                    }
+
+                }
+                this.zscoremap.put(feature_check, maxZscore);
+                best_correlated = 0;
+                // if the best cor is under 0.5 then use use z sccore
+
+
+            } else {
+                if(best_corlation_couples.containsKey(save_through_feature)){continue;}
+                Vector<Point> point_for_cercle = new Vector<>();
+                //otherwise circle
+                for (int t = 0; t < v_check.length; t++) {
+                    point_for_cercle.add(new Point(v_check[t], through_v[t]));
+                }
+                //need tgo complete the circle algo
+                // Circle data = new AlgorithmMinCircle().welzl(point_for_cercle);
+                // this.CirclecorrelatedFeaturesList.put(feature_check, new CircleCorrelatedFeatures(feature_check, save_through_feature, best_correlated, data.center, data.radius));
+                best_correlated = 0;
+            }
+
+
+        }
+    }
+
+    public float checkZScore(float num,Float[] curColToCheck){
+        float curAvg=0, curStiya=0, curZscore=0;
+        curStiya= (float) Math.sqrt(StatLib.var(curColToCheck));
+        if(curStiya==0){return 0; }
+        curAvg=StatLib.avg(curColToCheck);
+        curZscore=Math.abs(num-curAvg)/curStiya;
+        return curZscore;
+
+    }
+    @Override
+    public List<AnomalyReport> detect(TimeSeries ts) {
+
+        List<AnomalyReport> anomalyReportList = new LinkedList<>();
+        float[] curColToCheck;
+        Float[] curArray;
+        String[] features = ts.FeaturesList();
+        for (LineCorrelatedFeatures correlatedFeatures : this.LinecorrelatedFeaturesList.values()) {
+
+            for (int i = 0; i < ts.getSizeOfVector(); i++) {
+                Point p = new Point(ts.valueAtIndex(i, correlatedFeatures.feature1), ts.valueAtIndex(i, correlatedFeatures.feature2));
+                if (StatLib.dev(p,correlatedFeatures.lin_reg) > correlatedFeatures.threshold)
+                    anomalyReportList.add(new AnomalyReport( correlatedFeatures.feature1 + "-"
+                            + correlatedFeatures.feature2, (long)i+1));
+
+            }
+        }
+        for (String name_feature:this.zscoremap.keySet()) {
+            float curZscore;
+            int hashSize=ts.getHashMap().size();
+            curColToCheck = ts.getHashMap().get(name_feature);
+            ArrayList<Float> curArrayList=new ArrayList<>();
+            curArrayList.add(curColToCheck[0]);
+            for (int i=1;i<hashSize-1;i++) {
+                curArray=curArrayList.toArray(new Float[0]);
+                curZscore=checkZScore(curColToCheck[i], curArray);
+                curArrayList.add(curColToCheck[i]);
+                if ( curZscore > this.zscoremap.get(name_feature)) {
+                    anomalyReportList.add(new AnomalyReport("division in col " + name_feature, (long) i + 1));
+                }
+            }
+        }
+
+        for (CircleCorrelatedFeatures correlatedFeatures : this.CirclecorrelatedFeaturesList.values()) {
+            Circle check_in_circle = new Circle (correlatedFeatures.center,correlatedFeatures.radius);
+            for (int i = 0; i < ts.getSizeOfVector(); i++) {
+                Point p = new Point(ts.valueAtIndex(i, correlatedFeatures.feature1), ts.valueAtIndex(i, correlatedFeatures.feature2));
+                if (!check_in_circle.containsPoint(p))
+                    anomalyReportList.add(new AnomalyReport( correlatedFeatures.feature1 + "-"
+                            + correlatedFeatures.feature2, (long)i+1));
+            }
+        }
+
+        return anomalyReportList;
+
+
+
 
     }
 
     @Override
-    public List<AnomalyReport> detect(TimeSeries ts) {
-        return null;
-    }
+    public HashMap<String,String> paint(TimeSeries ts,String feature) {
 
+        return this.best_corlation_couples;
 
-    public HashMap<String, String> paint(TimeSeries ts) {
-        return null;
-    }
-
-//    @Override
-//    public void learnNormal(TimeSeries ts) {
-//        //find the best correlation
-//        float best_correlated = 0, check_correlated = 0;
-//        String save_through_feature = "";
-//        String[] features = ts.FeaturesList();
-//        String feature_check = null;
-//        float[] v_check = null;
-//        float[] through_v = null;
-//
-//        for (int i = 0; i < ts.getHashMap().size() - 1; i++) { //for every feature checking cov with the other features
-//            feature_check = features[i];
-//            v_check = ts.getHashMap().get(feature_check);
-//            for (int j = 0; j < ts.getHashMap().size(); j++) {
-//                if(i==j){continue;}
-//                String through_feature = features[j];
-//                through_v = ts.getHashMap().get(through_feature);
-//                check_correlated = Math.abs(StatLib.pearson(v_check, through_v));
-//                if (check_correlated > best_correlated) {
-//                    best_correlated = check_correlated; //set the best cor
-//                    save_through_feature = through_feature;
-//                }
-//            }
-//            this.best_corlation_couples.put(feature_check, save_through_feature);
-//            //ues linear regration
-//            if (best_correlated >= 0.95) {
-//
-//                if(best_corlation_couples.containsKey(save_through_feature)){continue;}
-//                Point[] p = new Point[ts.getSizeOfVector()];
-//                for (int k = 0; k < ts.getSizeOfVector(); k++)
-//                    p[k] = new Point(ts.valueAtIndex(k, feature_check), ts.valueAtIndex(k, save_through_feature));
-//                Line reg_line = StatLib.linear_reg(p);
-//                float max_dev = -1;
-//                for (Point point : p) {
-//                    float result = StatLib.dev(point, reg_line);
-//                    if (result > max_dev)
-//                        max_dev = result;
-//
-//                }
-//                max_dev *= (float) 1.1;
-//                this.LinecorrelatedFeaturesList.put(feature_check, new LineCorrelatedFeatures(feature_check, save_through_feature, best_correlated, reg_line, max_dev));
-//                best_correlated = 0;
-//
-//
-//            } else if (best_correlated < 0.5) {
-//
-//                Vector<Float> curArrayList = new Vector<Float>();
-//                float curAvg = 0, curStiya = 0, curZscore = 0, maxZscore = 0;
-//                Float[] curArray = null;
-//                curStiya = (float) Math.sqrt(StatLib.var(v_check));
-//                curArrayList.add(v_check[0]);
-//
-//                for (int j = 1; j < v_check.length; j++) {
-//                    curArray = curArrayList.toArray(new Float[0]);
-//                    curStiya = (float) Math.sqrt(StatLib.var(curArray));
-//                    curAvg = StatLib.avg(curArray);
-//                    curArrayList.add(v_check[j]);
-//                    if (curStiya == 0) {
-//                        continue;
-//                    }
-//                    curZscore = Math.abs(v_check[j] - curAvg) / curStiya;
-//                    if (curZscore > maxZscore) {
-//                        maxZscore = curZscore;
-//                    }
-//
-//                }
-//                this.zscoremap.put(feature_check, maxZscore);
-//                best_correlated = 0;
-//                // if the best cor is under 0.5 then use use z sccore
-//
-//
-//            } else {
-//                if(best_corlation_couples.containsKey(save_through_feature)){continue;}
-//                Vector<Point> point_for_cercle = new Vector<>();
-//                //otherwise circle
-//                for (int t = 0; t < v_check.length; t++) {
-//                    point_for_cercle.add(new Point(v_check[t], through_v[t]));
-//                }
-//                //need tgo complete the circle algo
-//                // Circle data = new AlgorithmMinCircle().welzl(point_for_cercle);
-//                // this.CirclecorrelatedFeaturesList.put(feature_check, new CircleCorrelatedFeatures(feature_check, save_through_feature, best_correlated, data.center, data.radius));
-//                best_correlated = 0;
-//            }
-//
-//
-//        }
-//    }
-//
-//    public float checkZScore(float num,Float[] curColToCheck){
-//        float curAvg=0, curStiya=0, curZscore=0;
-//        curStiya= (float) Math.sqrt(StatLib.var(curColToCheck));
-//        if(curStiya==0){return 0; }
-//        curAvg=StatLib.avg(curColToCheck);
-//        curZscore=Math.abs(num-curAvg)/curStiya;
-//        return curZscore;
-//
-//    }
-//    @Override
-//    public List<AnomalyReport> detect(TimeSeries ts) {
-//
-//        List<AnomalyReport> anomalyReportList = new LinkedList<>();
-//        float[] curColToCheck;
-//        Float[] curArray;
-//        String[] features = ts.FeaturesList();
-//        for (LineCorrelatedFeatures correlatedFeatures : this.LinecorrelatedFeaturesList.values()) {
-//
-//            for (int i = 0; i < ts.getSizeOfVector(); i++) {
-//                Point p = new Point(ts.valueAtIndex(i, correlatedFeatures.feature1), ts.valueAtIndex(i, correlatedFeatures.feature2));
-//                if (StatLib.dev(p,correlatedFeatures.lin_reg) > correlatedFeatures.threshold)
-//                    anomalyReportList.add(new AnomalyReport( correlatedFeatures.feature1 + "-"
-//                            + correlatedFeatures.feature2, (long)i+1));
-//
-//            }
-//        }
-//        for (String name_feature:this.zscoremap.keySet()) {
-//            float curZscore;
-//            int hashSize=ts.getHashMap().size();
-//            curColToCheck = ts.getHashMap().get(name_feature);
-//            ArrayList<Float> curArrayList=new ArrayList<>();
-//            curArrayList.add(curColToCheck[0]);
-//            for (int i=1;i<hashSize-1;i++) {
-//                curArray=curArrayList.toArray(new Float[0]);
-//                curZscore=checkZScore(curColToCheck[i], curArray);
-//                curArrayList.add(curColToCheck[i]);
-//                if ( curZscore > this.zscoremap.get(name_feature)) {
-//                    anomalyReportList.add(new AnomalyReport("division in col " + name_feature, (long) i + 1));
-//                }
-//            }
-//        }
-//
-//        for (CircleCorrelatedFeatures correlatedFeatures : this.CirclecorrelatedFeaturesList.values()) {
-//            Circle check_in_circle = new Circle (correlatedFeatures.center,correlatedFeatures.radius);
-//            for (int i = 0; i < ts.getSizeOfVector(); i++) {
-//                Point p = new Point(ts.valueAtIndex(i, correlatedFeatures.feature1), ts.valueAtIndex(i, correlatedFeatures.feature2));
-//                if (!check_in_circle.containsPoint(p))
-//                    anomalyReportList.add(new AnomalyReport( correlatedFeatures.feature1 + "-"
-//                            + correlatedFeatures.feature2, (long)i+1));
-//            }
-//        }
-//
-//        return anomalyReportList;
-//
-//
-//
-//
-//    }
-//
-//    @Override
-//    public HashMap<String, String> paint(TimeSeries ts) {
-//
-//        return null;
 
 //        float[] feature_to_point1,feature_to_point2;
 //        String[] features=ts.FeaturesList();
@@ -208,7 +194,7 @@ public class HybridAnomalyDetector implements TimeSeriesAnomalyDetector {
 
 
 
-
+}
 
 
 

@@ -83,10 +83,17 @@ public class SimpleAnomalyDetector implements TimeSeriesAnomalyDetector {
 	}
 
 
+	@Override
+	public HashMap<String,String> paint(TimeSeries ts,String feature) {
+		if(best_corlation_couples.get(feature)==null){return null;}
 
-	public HashMap<String, String> paint(TimeSeries ts) {
+		float[] go_featur= ts.getHashMap().get(feature);
+		float[] to_feature = ts.getHashMap().get(best_corlation_couples.get(feature));
 
-		return null;
+
+		
+
+		return best_corlation_couples;
 		//if(featrue==null){return null;}
 //		float[] feature_to_point1,feature_to_point2;
 //		String[] features=ts.FeaturesList();
@@ -110,6 +117,12 @@ public class SimpleAnomalyDetector implements TimeSeriesAnomalyDetector {
 //		}
 //		return paint_map;
 	}
+
+
+
+
+
+
 
 
 }

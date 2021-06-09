@@ -1,21 +1,24 @@
 package view;
 
+import PTM1.AnomalyDetector.TimeSeriesAnomalyDetector;
+import PTM1.Helpclass.Line;
+import PTM1.Helpclass.Point;
 import javafx.beans.property.*;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.ListView;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 import javafx.scene.input.MouseEvent;
 
 import javafx.scene.control.Button;
@@ -26,13 +29,23 @@ import javafx.stage.Stage;
 import view.Tags.TagsController;
 import view.Tags.TagsDisplay;
 import view.pannel.Pannel;
+import view.circlechart.MyCircleChart;
+import view.joystick.MyJoystick;
 import view_model.ViewModel;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.net.URLClassLoader;
+import java.util.List;
+import java.util.ResourceBundle;
+
+
+public class View implements Initializable{
 
 
 public class View {
@@ -52,12 +65,27 @@ public class View {
         ListView<String> fList;
 
 
+    @FXML
+    private NumberAxis x,x1,algo_x;
+    @FXML
+    private NumberAxis y,y1,algo_y;
+    @FXML
+    private LineChart CorrelatedFeatureLineChart, FeatureLineChart,Algolinechart;
+    @FXML
+    MyJoystick myJoystick;
+    @FXML
+    MyCircleChart mycirclechart;
+//    @FXML
+//    private javafx.scene.chart.BubbleChart<?,?> algoFeatureLineChart;
+    @FXML
+        private Canvas co;
+
         ViewModel vm;
+        boolean mousePushed;
         double mx,my;
         FloatProperty aileron,elevator,altitude,airSpeed,heading;
         IntegerProperty time_step;
-        StringProperty selectedFeature;
-        BooleanProperty check_settings;
+        StringProperty selected_feature;
 
         public View () {
             aileron = new SimpleFloatProperty();
@@ -66,11 +94,7 @@ public class View {
             airSpeed = new SimpleFloatProperty();
             heading = new SimpleFloatProperty();
             time_step = new SimpleIntegerProperty();
-
-            selectedFeature = new SimpleStringProperty();
-
-            check_settings = new SimpleBooleanProperty();
-
+            selected_feature = new SimpleStringProperty();
         }
 
 
@@ -116,7 +140,7 @@ public class View {
 
     public void getPaintFunc(){
 
-       // vm.getpainter();
+        vm.getpainter();
 
 
     }
@@ -126,6 +150,7 @@ public class View {
     }
     public void openBtnPreesed() {
 
+        System.out.println("22btn pressed");
         Stage stage = new Stage();
         stage.setTitle("File chooser sample");
 
@@ -196,21 +221,6 @@ public class View {
         for (String feature:this.vm.getDisplayVariables().keySet()) {
             features.add(feature);
         }
-
-//        ObservableList features = FXCollections.observableArrayList();
-//        features.removeAll(features);
-//
-//        features.add("aileron");
-//        features.add("elevator");
-//        features.add("rudder");
-//        features.add("throttle");
-//        features.add("altimeter");
-//        features.add("altitude");
-//        features.add("airSpeed");
-//        features.add("heading");
-//        features.add("roll");
-//        features.add("pitch");
-//        features.add("yaw");
 
         fList.getItems().addAll(features);
 
