@@ -50,7 +50,7 @@ import java.util.List;
         Pannel pannel;
         @FXML
         ListView<String> fList;
-
+        @FXML
 
 //    @FXML
 //    private NumberAxis x,x1,algo_x;
@@ -207,6 +207,21 @@ import java.util.List;
 
 
             });
+        }
+        public void FeatureGraphPaint(String [] x,int [] y){
+            XYChart.Series series = new XYChart.Series();
+            for(int i=0; i<x.length; i++){
+                series.getData().add(new XYChart.Data(x[i],y[i]));
+            }
+            FeatureLineChart.getData().addAll(series);
+        }
+
+        public void CorrelatedFeatureGraphPaint(String [] x,int [] y){
+            XYChart.Series series = new XYChart.Series();
+            for(int i=0; i<x.length; i++){
+                series.getData().add(new XYChart.Data(x[i],y[i]));
+            }
+            CorrelatedFeatureLineChart.getData().addAll(series);
         }
     }
 
