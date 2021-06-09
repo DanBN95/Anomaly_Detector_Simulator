@@ -1,22 +1,11 @@
 package model;
 
 import PTM1.AnomalyDetector.TimeSeriesAnomalyDetector;
-import javafx.beans.InvalidationListener;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleFloatProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import sample.Properties;
 import sample.UserSettings;
-
 import PTM1.Helpclass.TimeSeries;
-
-import java.beans.ExceptionListener;
-import java.beans.XMLDecoder;
-import java.beans.XMLEncoder;
 import java.io.*;
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.*;
@@ -35,13 +24,10 @@ public class Model extends Observable  {
     public IntegerProperty timestep;
 
     public Model(String settings) {
-
-       // this.userSettings = new UserSettings();
         setSettings(settings);
+        // this.userSettings = new UserSettings();
        // serializeToXML(userSettings,settings);
        // userSettings = desrializeFromXML(settings);
-
-
     }
 
     public void csvToFg(TimeSeries ts) {
@@ -51,7 +37,6 @@ public class Model extends Observable  {
     and for every value the fg put it in the right placee
     thank to the playback_small file
      */
-
             System.out.println("csvToFg");
         try {
             fg = new Socket(ip,port);
@@ -62,7 +47,6 @@ public class Model extends Observable  {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
     public void setSettings(String settings) {
@@ -96,7 +80,6 @@ public class Model extends Observable  {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        //set Deafault locations
 //        try {
 //            String [] strings = InetAddress.getLocalHost().toString().split("/");
 //            userSettings.setIp(strings[1]);
@@ -261,25 +244,22 @@ public class Model extends Observable  {
     public TimeSeriesAnomalyDetector getAnomalyDetector() {
         return anomalyDetector;
     }
-    public void setAnomalyDetector(TimeSeriesAnomalyDetector ad ){
+
+    public void setAnomalyDetevtor(TimeSeriesAnomalyDetector ad ){
         this.anomalyDetector=ad;
         if(this.timeSeries!=null){
             this.anomalyDetector.learnNormal(this.timeSeries);
             this.anomalyDetector.detect(this.timeSeries);
 
         }
-
     }
-
 
     // Projection Functions:
     public void setTimeSeries(TimeSeries ts) {
         this.timeSeries = ts;
-
         if(this.anomalyDetector!=null){
             this.anomalyDetector.learnNormal(this.timeSeries);
             this.anomalyDetector.detect(this.timeSeries);
-
         }
     }
 
@@ -314,16 +294,8 @@ public class Model extends Observable  {
     }
 
     public HashMap<String, SimpleFloatProperty> showFields() {
-//        Class<?> clazz = this.userSettings.getClass();
-//        List<String> featurelist_fromsetting=new LinkedList<>();
-        HashMap<String, SimpleFloatProperty> scores=new HashMap<>();
 
-//        for(Field field : clazz.getDeclaredFields()) {
-//
-//                if(!field.equals("ip")) {
-//                    scores.put(field.getName(), new SimpleFloatProperty());
-//            }
-//        }
+        HashMap<String, SimpleFloatProperty> scores=new HashMap<>();
         for (String feature:this.setting_map.keySet()) {
             if(this.setting_map.get(feature).size()==3){
                 scores.put(feature, new SimpleFloatProperty());
@@ -332,7 +304,4 @@ public class Model extends Observable  {
             System.out.println(scores.keySet());
             return scores;
     }
-
-
-    //add start to anomlydetector to start search detector
 }

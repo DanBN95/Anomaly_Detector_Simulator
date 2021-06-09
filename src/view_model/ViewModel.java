@@ -32,35 +32,34 @@ import java.util.Observer;
 public class ViewModel implements Observer {
 
     Model model;
-    private HashMap<String,FloatProperty> displayVariables;
-    public FloatProperty aileron,elevator,rudder,throttle,altitude,airSpeed,heading;
+
+    TimeSeries timeSeries;
+    TimeSeriesAnomalyDetector anomalyDetector;
+
     public File file;
-    public StringProperty selected_feature;
 
     public final Runnable play,pause,stop;
 
-    // Attach video slider to timestep : timestep.bind(video_timestep)
-    IntegerProperty time_step;
-    TimeSeries timeSeries;
-    TimeSeriesAnomalyDetector anomalyDetector;
-    private HashMap<String, SimpleFloatProperty> displayVariables;
+    public IntegerProperty time_step;
+
+    private HashMap<String,SimpleFloatProperty> displayVariables;
+    public FloatProperty aileron,elevator,rudder,throttle,altitude,airSpeed,heading;
+    public StringProperty selected_feature;
     public BooleanProperty check_settings;
+
+
 
     public ViewModel(Model m) {
         this.model = m;
         this.model.addObserver(this);
-        displayVariables = new HashMap<>();
-
 
         displayVariables = this.model.showFields();
-        check_settings.setValue(true);
 
-        selected_feature = new String();
+        check_settings.setValue(true);
 
         time_step = new SimpleIntegerProperty();
 
         this.model.timestep.bind(this.time_step);
-
 
         //  When those features are changing, it evoke a change in the model
 //        this.displayVariables.get("aileron").addListener((o, val, newval) -> model.setAileron((float) newval));
@@ -71,6 +70,7 @@ public class ViewModel implements Observer {
 //        this.displayVariables.get("heading").addListener((o, val, newval) -> model.setHeading((float) newval));
 
           //Change in the time step evoke setTime_step function with the new value as a parameter
+
         time_step.addListener((o, ov, nv) -> {
             Platform.runLater(() -> setTimeStep((int) nv));
         });
@@ -88,8 +88,7 @@ public class ViewModel implements Observer {
     public void setTimeSeries(File f) {
         this.file = f;
         this.timeSeries = new TimeSeries(file.getPath());
-        System.out.println("Vector timeseries size: " + timeSeries.getVector_size());
-        model.csvToFg(this.timeSeries);
+        model.setTimeSeries(this.timeSeries);
     }
 
 
@@ -97,7 +96,6 @@ public class ViewModel implements Observer {
         System.out.println("timestep from slider: " + time_step);
         this.model.timestep.set(time_step);
         if(timeSeries!=null){
-
             for (String feature : this.displayVariables.keySet()) {
                     displayVariables.get(feature).setValue(timeSeries.valueAtIndex(time_step,this.model.setting_map.get(feature).get(0)));
                  }
@@ -111,8 +109,9 @@ public class ViewModel implements Observer {
 //        airSpeed.setValue(timeSeries.valueAtIndex(time_step, "air speed"));
 //        heading.setValue(timeSeries.valueAtIndex(time_step, "heading"));
 
-    public void setSelected_feature(String new_selected_feature ){
-        this.selected_feature=new_selected_feature;
+//    public void setSelected_feature(String new_selected_feature ) {
+//        this.selected_feature = new_selected_feature;
+//    }
 
     public HashMap<String, SimpleFloatProperty> getDisplayVariables() {
         return displayVariables;

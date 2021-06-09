@@ -4,14 +4,14 @@ import PTM1.AnomalyDetector.TimeSeriesAnomalyDetector;
 import PTM1.Helpclass.Line;
 import PTM1.Helpclass.Point;
 import javafx.beans.property.*;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -19,42 +19,29 @@ import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.ListView;
 import javafx.scene.input.MouseEvent;
-
 import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-import view.Tags.TagsController;
-import view.Tags.TagsDisplay;
 import view.pannel.Pannel;
 import view.circlechart.MyCircleChart;
 import view.joystick.MyJoystick;
 import view_model.ViewModel;
-
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
+
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ResourceBundle;
-import java.net.URLClassLoader;
-import java.util.List;
-import java.util.ResourceBundle;
 
-
-public class View implements Initializable{
-
-
-public class View {
+    public class View {
 
 
         @FXML
         Canvas joystick;
         @FXML
-        Slider rudder,throttle;
+        Slider rudder, throttle;
         @FXML
         Button open, connect;
         @FXML
@@ -65,29 +52,29 @@ public class View {
         ListView<String> fList;
 
 
-    @FXML
-    private NumberAxis x,x1,algo_x;
-    @FXML
-    private NumberAxis y,y1,algo_y;
-    @FXML
-    private LineChart CorrelatedFeatureLineChart, FeatureLineChart,Algolinechart;
-    @FXML
-    MyJoystick myJoystick;
-    @FXML
-    MyCircleChart mycirclechart;
 //    @FXML
-//    private javafx.scene.chart.BubbleChart<?,?> algoFeatureLineChart;
-    @FXML
-        private Canvas co;
+//    private NumberAxis x,x1,algo_x;
+//    @FXML
+//    private NumberAxis y,y1,algo_y;
+//    @FXML
+//    private LineChart CorrelatedFeatureLineChart, FeatureLineChart,Algolinechart;
+//    @FXML
+//    MyJoystick myJoystick;
+//    @FXML
+//    MyCircleChart mycirclechart;
+////    @FXML
+////    private javafx.scene.chart.BubbleChart<?,?> algoFeatureLineChart;
+//    @FXML
+//        private Canvas co;
 
         ViewModel vm;
-        boolean mousePushed;
-        double mx,my;
-        FloatProperty aileron,elevator,altitude,airSpeed,heading;
+        double mx, my;
+        FloatProperty aileron, elevator, altitude, airSpeed, heading;
         IntegerProperty time_step;
         StringProperty selected_feature;
+        BooleanProperty check_settings;
 
-        public View () {
+        public View() {
             aileron = new SimpleFloatProperty();
             elevator = new SimpleFloatProperty();
             altitude = new SimpleFloatProperty();
@@ -95,6 +82,7 @@ public class View {
             heading = new SimpleFloatProperty();
             time_step = new SimpleIntegerProperty();
             selected_feature = new SimpleStringProperty();
+            check_settings = new SimpleBooleanProperty();
         }
 
 
@@ -108,71 +96,57 @@ public class View {
             this.airSpeed.bind(vm.getDisplayVariables().get("airSpeed"));
             this.heading.bind(vm.getDisplayVariables().get("heading"));
             this.time_step.bindBidirectional(vm.time_step);
-            vm.selected_feature.bind(this.selectedFeature);
+            vm.selected_feature.bind(this.selected_feature);
 //            this.check_settings.bind(vm.check_settings);
 //            check_settings.addListener((o,ov,nv)->initFeature());
 
-            pannel.controller.onPlay=vm.play;
-            pannel.controller.onPause=vm.pause;
-            pannel.controller.onStop=vm.stop;
+            pannel.controller.onPlay = vm.play;
+            pannel.controller.onPause = vm.pause;
+            pannel.controller.onStop = vm.stop;
             initFeature();
             paint();
 
 
+        }
 
-    }
+        public void paint() { // To do: attach joystick to features: aileron,elevators
+            GraphicsContext gc = joystick.getGraphicsContext2D();
 
-    public void paint() { // To do: attach joystick to features: aileron,elevators
-        GraphicsContext gc = joystick.getGraphicsContext2D();
+            mx = joystick.getWidth() / 2;
+            my = joystick.getHeight() / 2;
 
-        mx = joystick.getWidth() / 2;
-        my = joystick.getHeight() / 2;
+            gc.strokeOval(mx - 50, my - 50, 100, 100); //painting a circle
 
-        gc.strokeOval(mx - 50, my - 50, 100, 100); //painting a circle
-
-    }
-
-    public void paint_2G(){
-        //הפונקציות של הדר
+        }
 
 
-    }
-
-    public void getPaintFunc(){
-
-        vm.getpainter();
-
-
-    }
-
-    public void connectFg(){
+        public void connectFg() {
             vm.connect2fg();
-    }
-    public void openBtnPreesed() {
+        }
 
-        System.out.println("22btn pressed");
-        Stage stage = new Stage();
-        stage.setTitle("File chooser sample");
+        public void openBtnPreesed() {
 
+            Stage stage = new Stage();
+            stage.setTitle("File chooser sample");
 
-        final FileChooser fileChooser = new FileChooser();
+            final FileChooser fileChooser = new FileChooser();
 
-        File file = fileChooser.showOpenDialog(stage);
-        if (file != null) {
-            try {
+            File file = fileChooser.showOpenDialog(stage);
+            if (file != null) {
+                try {
 
-                if(file.getPath().endsWith(".csv")){
-                    connect.setDisable(false);
-                    vm.setTimeSeries(file);
+                    if (file.getPath().endsWith(".csv")) {
+                        connect.setDisable(false);
+                        vm.setTimeSeries(file);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
             }
         }
-    }
 
 
-    public void LoadAlgo() {
+        public void LoadAlgo() {
 //
 //
 //        Stage stage = new Stage();
@@ -203,36 +177,37 @@ public class View {
 //            }
 //        }
 
-    }
+        }
 
 
-    public void changeTimeStep(MouseEvent mouseEvent) {
-        System.out.println("time step has changed");
-        this.time_step.set((int) slider.getValue());
-        System.out.println(this.time_step);
-    }
+        public void changeTimeStep(MouseEvent mouseEvent) {
+            System.out.println("time step has changed");
+            this.time_step.set((int) slider.getValue());
+            System.out.println(this.time_step);
+        }
 
 
-
-    public void initFeature() {
+        public void initFeature() {
 
 
             List<String> features = new LinkedList<>();
-        for (String feature:this.vm.getDisplayVariables().keySet()) {
-            features.add(feature);
-        }
-
-        fList.getItems().addAll(features);
-
-        fList.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
-
-            @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                selectedFeature.setValue(fList.getSelectionModel().getSelectedItem());
-                System.out.println(fList.getSelectionModel().getSelectedItem() + " was selected");
+            for (String feature : this.vm.getDisplayVariables().keySet()) {
+                features.add(feature);
             }
-        });
+
+            fList.getItems().addAll(features);
+
+            fList.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
+
+                @Override
+                public void changed(ObservableValue<? extends String> observableValue, String s, String t1) {
+                    selected_feature.setValue(fList.getSelectionModel().getSelectedItem());
+                    System.out.println(fList.getSelectionModel().getSelectedItem() + " was selected");
+                }
+
+
+            });
+        }
     }
-}
 
 
