@@ -290,14 +290,13 @@ public class Model extends Observable  {
                 @Override
                 public void run() {
                     System.out.println("sending row "+ timestep.get());
-                    String row_data = timeSeries.row_array(timestep.getValue());
-                    System.out.println();
+                    String row_data = timeSeries.row_array(timestep.get());
                     out2fg.println(row_data);
-
+                    System.out.println(row_data);
                     timestep.set(timestep.get()+1);
 
                 }
-            },0,1000);
+            },0,300);
         }
     }
 

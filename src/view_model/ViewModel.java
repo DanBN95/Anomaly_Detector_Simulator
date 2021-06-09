@@ -88,7 +88,8 @@ public class ViewModel implements Observer {
 
 
     public void setTimeStep(int time_step) {
-        System.out.println("***********************************************");
+        System.out.println("timestep from slider: " + time_step);
+        this.model.timestep.set(time_step);
         if(timeSeries!=null){
 
             for (String feature : this.displayVariables.keySet()) {
@@ -111,7 +112,7 @@ public class ViewModel implements Observer {
 
 
     @Override
-    public void update(Observable o, Object arg) {
+    public void update(Observable o, Object time_step) {
 
     }
 
