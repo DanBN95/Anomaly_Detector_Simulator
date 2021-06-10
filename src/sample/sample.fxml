@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.canvas.Canvas?>
-<?import javafx.scene.chart.CategoryAxis?>
 <?import javafx.scene.chart.LineChart?>
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.control.Button?>
@@ -12,74 +11,101 @@
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.shape.Circle?>
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.View">
-    <SplitPane dividerPositions="0.7359437751004017" orientation="VERTICAL" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="320.0" prefWidth="599.0">
-            <Pane layoutX="192.0" layoutY="119.0" prefHeight="163.0" prefWidth="244.0">
-                <LineChart layoutX="-6.0" layoutY="3.0" prefHeight="157.0" prefWidth="236.0">
-                    <xAxis>
-                        <CategoryAxis side="BOTTOM" />
-                    </xAxis>
-                    <yAxis>
-                        <NumberAxis side="LEFT" />
-                    </yAxis>
-                </LineChart>
-            </Pane>
-            <ListView fx:id="featuresList" prefHeight="243.0" prefWidth="189.0" AnchorPane.bottomAnchor="37.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="400.0" AnchorPane.topAnchor="10.0" />
-            <SplitPane dividerPositions="0.5" layoutX="208.0" layoutY="14.0" prefHeight="100.0" prefWidth="205.0" AnchorPane.topAnchor="10.0">
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
-                    <LineChart fx:id="LineChart" prefHeight="88.66666666666667" prefWidth="94.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+<?import view.pannel.Pannel?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="718.0" prefWidth="1051.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.View">
+    <SplitPane fx:id="myancor" dividerPositions="0.7359437751004017" orientation="VERTICAL" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="584.0" prefWidth="1204.0">
+            <Pane layoutX="192.0" layoutY="119.0" prefHeight="163.0" prefWidth="244.0" />
+            <Button fx:id="open" layoutX="11.0" layoutY="459.0" mnemonicParsing="false" onAction="#openBtnPreesed" prefHeight="46.0" prefWidth="86.0" text="Open" />
+            <Button fx:id="fly" disable="true" layoutX="106.0" layoutY="459.0" mnemonicParsing="false" onAction="#connectFg" prefHeight="46.0" prefWidth="86.0" text="Fly!" />
+         <ListView fx:id="fList" layoutX="10.0" layoutY="44.0" prefHeight="405.0" prefWidth="182.0" />
+             <LineChart layoutX="377.0" layoutY="282.0" prefHeight="221.0" prefWidth="332.0">
+                 <xAxis>
+                     <NumberAxis side="BOTTOM" />
+                 </xAxis>
+                 <yAxis>
+                     <NumberAxis side="LEFT" />
+                 </yAxis>
+             </LineChart>
+         <Pane layoutX="529.0" layoutY="31.0" prefHeight="230.0" prefWidth="290.0" AnchorPane.leftAnchor="529.0" AnchorPane.rightAnchor="256.0">
+            <children>
+                    <LineChart fx:id="CorrelatedFeatureLineChart" layoutX="-13.0" prefHeight="230.0" prefWidth="290.0">
                         <xAxis>
-                            <CategoryAxis fx:id="timestep" side="BOTTOM" />
+                            <NumberAxis side="BOTTOM" fx:id="x1" />
+                        </xAxis>
+                        <yAxis>
+                            <NumberAxis fx:id="y1" side="LEFT" />
+                        </yAxis>
+                    </LineChart>
+            </children>
+         </Pane>
+         <Pane layoutX="204.0" layoutY="35.0" prefHeight="230.0" prefWidth="290.0" AnchorPane.leftAnchor="204.0" AnchorPane.rightAnchor="561.0">
+            <children>
+                    <LineChart fx:id="FeatureLineChart" prefHeight="230.0" prefWidth="290.0">
+                        <xAxis>
+                            <NumberAxis side="BOTTOM" fx:id="x" />
                         </xAxis>
                         <yAxis>
                             <NumberAxis fx:id="y" side="LEFT" />
                         </yAxis>
                     </LineChart>
-                </AnchorPane>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="89.0" prefWidth="105.0">
-                    <LineChart prefHeight="88.66666666666667" prefWidth="94.66666666666667" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                        <xAxis>
-                            <CategoryAxis side="BOTTOM" />
-                        </xAxis>
-                        <yAxis>
-                            <NumberAxis side="LEFT" />
-                        </yAxis>
-                    </LineChart>
-                </AnchorPane>
-            </SplitPane>
-            <SplitPane dividerPositions="0.5" layoutX="423.0" layoutY="20.0" orientation="VERTICAL" prefHeight="241.0" prefWidth="160.0" AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
-                    <Slider fx:id="rudder" layoutX="25.0" layoutY="96.0" prefHeight="25.0" prefWidth="122.0" />
-                    <Slider fx:id="throttle" layoutX="11.0" orientation="VERTICAL" prefHeight="89.0" prefWidth="14.0" />
-                    <Canvas fx:id="joystick" height="82.0" layoutX="31.0" layoutY="12.0" width="116.0" />
-                </AnchorPane>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0" />
-            </SplitPane>
-            <Button fx:id="open" layoutX="10.0" layoutY="253.0" mnemonicParsing="false" onAction="#openBtnPreesed" prefHeight="2.0" prefWidth="65.0" text="Open" />
-        </AnchorPane>
-        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="103.0" prefWidth="597.0">
-            <Slider fx:id="slider" blockIncrement="100.0" layoutX="10.0" layoutY="69.0" max="2174.0" onMouseClicked="#changeTimeStep" prefHeight="38.0" prefWidth="569.0" showTickLabels="true" showTickMarks="true" />
-            <TextField layoutX="422.0" layoutY="29.0" prefHeight="25.0" prefWidth="33.0" promptText="0.5" />
-            <Text layoutX="347.0" layoutY="46.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Play Speed" />
-            <Text layoutX="470.0" layoutY="49.0" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 20;" text="00:05:40">
-                <font>
-                    <Font name="Arial Black" size="20.0" />
-                </font>
-            </Text>
+            </children>
+         </Pane>
+         <Pane layoutX="827.0" layoutY="35.0" prefHeight="326.0" prefWidth="500.0">
+            <children>
+                    <Slider fx:id="rudder" layoutX="21.0" layoutY="158.0" prefHeight="25.0" prefWidth="200.0" />
+                    <Slider fx:id="throttle" layoutX="14.0" layoutY="4.0" orientation="VERTICAL" prefHeight="154.0" prefWidth="14.0" />
+                    <Canvas fx:id="joystick" height="138.0" layoutX="28.0" layoutY="16.0" width="159.0" />
+            </children>
+         </Pane>
+         <GridPane layoutX="813.0" layoutY="278.0" prefHeight="200.0" prefWidth="200.0">
+           <columnConstraints>
+             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+           </columnConstraints>
+           <rowConstraints>
+             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+           </rowConstraints>
+            <children>
+               <Circle fill="#e4d7e8" radius="29.0" stroke="BLACK" strokeType="INSIDE" />
+               <Circle fill="#e4d7e8" radius="29.0" stroke="BLACK" strokeType="INSIDE" GridPane.rowIndex="1" />
+               <Circle fill="#e4d7e8" radius="29.0" stroke="BLACK" strokeType="INSIDE" GridPane.rowIndex="2" />
+               <Circle fill="#e4d7e88f" radius="29.0" stroke="BLACK" strokeType="INSIDE" GridPane.columnIndex="1" />
+               <Circle fill="#e4d7e8" radius="29.0" stroke="BLACK" strokeType="INSIDE" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+               <Circle fill="#e4d7e8" radius="29.0" stroke="BLACK" strokeType="INSIDE" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            </children>
+         </GridPane>
+         <Text fx:id="featuresList" fill="WHITE" layoutX="45.0" layoutY="27.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Features List" wrappingWidth="159.0" />
 
-            <MenuButton fx:id="choose_Algo" layoutX="28.0" layoutY="36.0" mnemonicParsing="false" text="Choose Algorithm">
-
+            <MenuButton fx:id="choose_Algo" layoutX="204.0" layoutY="459.0" mnemonicParsing="false" prefHeight="46.0" prefWidth="119.0" text="Algorithm">
                 <items>
                     <MenuItem fx:id="Zscore" mnemonicParsing="false" onAction="#LoadAlgo" text="Algorithm Zscore" />
                     <MenuItem fx:id="Linereg" mnemonicParsing="false" onAction="#LoadAlgo" text="Algorithm Linear regression" />
                     <MenuItem fx:id="Hybrid" mnemonicParsing="false" onAction="#LoadAlgo" text="Algorithm Hybrid" />
                 </items>
             </MenuButton>
+        </AnchorPane>
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="103.0" prefWidth="597.0">
+            <Slider fx:id="slider" blockIncrement="100.0" layoutX="10.0" layoutY="69.0" max="2174.0" onMouseClicked="#changeTimeStep" prefHeight="38.0" prefWidth="1033.0" showTickLabels="true" showTickMarks="true" AnchorPane.leftAnchor="10.666666666666515" AnchorPane.rightAnchor="5.333333333333485" />
+            <TextField layoutX="651.0" layoutY="30.0" prefHeight="25.0" prefWidth="33.0" promptText="0.5" />
+            <Text fill="WHITE" layoutX="576.0" layoutY="47.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Play Speed" />
+            <Text fill="WHITE" layoutX="700.0" layoutY="49.0" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 20;" text="00:05:40">
+                <font>
+                    <Font name="Arial Black" size="20.0" />
+                </font>
+            </Text>
+            <Pannel fx:id="pannel"></Pannel>
         </AnchorPane>
     </SplitPane>
 </AnchorPane>
