@@ -13,6 +13,7 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.chart.CategoryAxis;
@@ -23,19 +24,22 @@ import javafx.scene.control.ListView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.paint.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import view.pannel.Pannel;
-import view.circlechart.MyCircleChart;
 import view.joystick.MyJoystick;
 import view_model.ViewModel;
 import java.io.File;
 
+import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ResourceBundle;
 
-    public class View {
+public class View implements Initializable {
 
 
         @FXML
@@ -56,6 +60,8 @@ import java.util.List;
         private NumberAxis y,y1,algo_y;
         @FXML
         private javafx.scene.chart.LineChart<?,?> CorrelatedFeatureLineChart, FeatureLineChart;
+
+
 
 //    @FXML
 //    private NumberAxis x,x1,algo_x;
@@ -90,7 +96,14 @@ import java.util.List;
             check_settings = new SimpleBooleanProperty();
         }
 
-
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        int[] x={1,2,3,4,5};
+        int[] y={23,10,30,14,50};
+        int[] y1={50,2,12,10,34};
+        FeatureGraphPaint(x,y);
+        CorrelatedFeatureGraphPaint(x,y1);
+    }
         public void init(ViewModel vm) {
             this.vm = vm;
             this.rudder.valueProperty().bind(vm.getDisplayVariables().get("rudder"));
@@ -120,7 +133,17 @@ import java.util.List;
             mx = joystick.getWidth() / 2;
             my = joystick.getHeight() / 2;
 
-            gc.strokeOval(mx - 50, my - 50, 100, 100); //painting a circle
+           // gc.strokeOval(mx - 50, my - 50, 100, 100); //painting a circle
+            var stops1 = new Stop[] { new Stop(0, Color.ALICEBLUE),
+                    new Stop(1, Color.BLACK)};
+
+            var lg1 = new RadialGradient(0, 0, 0.5, 0.5, 0.8, true,
+                    CycleMethod.NO_CYCLE, stops1);
+            gc.setFill(lg1);
+
+            gc.fillOval(mx - 50, my - 50, 100, 100);
+
+
 
         }
 
@@ -213,21 +236,25 @@ import java.util.List;
 
             });
         }
-        public void FeatureGraphPaint(String [] x,int [] y){
+        public void FeatureGraphPaint(int [] x,int [] y){
             XYChart.Series series = new XYChart.Series();
             for(int i=0; i<x.length; i++){
                 series.getData().add(new XYChart.Data(x[i],y[i]));
             }
+            series.setName("Feature");
             FeatureLineChart.getData().addAll(series);
         }
 
-        public void CorrelatedFeatureGraphPaint(String [] x,int [] y){
+        public void CorrelatedFeatureGraphPaint(int [] x,int [] y){
             XYChart.Series series = new XYChart.Series();
             for(int i=0; i<x.length; i++){
                 series.getData().add(new XYChart.Data(x[i],y[i]));
             }
+            series.setName("Correlation");
             CorrelatedFeatureLineChart.getData().addAll(series);
         }
-    }
+
+
+}
 
 

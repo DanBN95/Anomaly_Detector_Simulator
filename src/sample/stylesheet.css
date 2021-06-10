@@ -1,0 +1,145 @@
+
+.axis:top {
+    -fx-border-color: transparent;
+}
+
+.axis:right {
+    -fx-border-color: transparent;
+}
+
+.axis:bottom {
+    -fx-border-color: transparent;
+    -fx-tick-label-fill: white;
+
+
+}
+
+.axis:left {
+    -fx-border-color: transparent;
+    -fx-tick-label-fill: white;
+
+}
+
+.chart {
+    -fx-background-color: 484445;
+    -fx-progress-color: yellow;
+    -fx-create-symbols: false;
+    -fx-tick-label-fill: white;
+    -fx-stroke: #df8ef8;
+
+}
+
+.chart-vertical-grid-lines {
+    -fx-stroke: transparent;
+}
+
+.chart-horizontal-grid-lines {
+    -fx-stroke: transparent;
+}
+.chart-plot-background {
+
+    -fx-background-color: #484445;
+    /*-fx-border-color: black;*/
+    /*-fx-border-width: 4px;*/
+    /*-fx-border-insets: -2px;*/
+}
+
+.slider .thumb{
+    -fx-background-color: #292929;
+    -fx-font-size: 15;
+}
+/*.slider {
+ -fx-background-color: yellow;
+}*/
+
+.list-view {
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+.list-cell{
+    -fx-background-color: transparent;
+    -fx-background-insets: 0 ;
+    -fx-alignment: center;
+    -fx-font-size:20;
+    -fx-padding: 0;
+    -fx-background-color: #484445;
+    -fx-font-family: berlin sans sans-serif;
+    -fx-text-fill: #98a29d;
+    -fx-padding: 3;
+}
+
+.list-cell:hover{
+    -fx-background-color: #f1eeb4;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+
+
+}
+
+#myancor{
+    -fx-background-color: #484445 !important;
+}
+
+.button {
+    -fx-font-size: 15;
+    -fx-content-display: bottom;
+    -fx-text-fill: white;
+    -fx-font-family: Tahoma;
+    -fx-font-weight: bold;
+}
+#open{
+    -fx-background-color: #5AA983;
+}
+#fly{
+    fx-background-color: #DB6537;
+}
+.chart-title {
+    -fx-text-fill: #4682b4;
+    -fx-font-size: 1.6em;
+}
+
+.axis-label {
+    -fx-text-fill: #4682b4;
+}
+.chart-legend {
+    -fx-background-color:  transparent;
+    -fx-font-size: 10px;
+
+}
+.chart-legend-item-symbol{
+    -fx-background-radius: 0;
+}
+
+.chart-legend-item{
+    -fx-font-family: Tahoma;
+    -fx-text-fill: #5AA983;
+    -fx-font-size: 15;
+    -fx-font-weight: bold;
+}
+
+#featuresTitle{
+    -fx-font-family: Tahoma;
+    -fx-text-fill: #5aa983;
+    -fx-font-size: 15px;
+}
+.chart-alternative-row-fill {
+    -fx-fill:transparent;
+    -fx-stroke: transparent;
+}
+
+.default-color0.chart-series-line {
+    -fx-stroke: linear-gradient(from 25% 25% to 100% 100%, #dc143c, #f1e509);
+}
+
+
+.default-color0.chart-line-symbol {
+    -fx-background-color: #e9bb5b, #db6537;
+}
+#featuresList{
+    -fx-text-fill: yellow;
+    -fx-font-size: 18;
+    -fx-font-weight: bold;
+}
+
+
