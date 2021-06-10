@@ -16,7 +16,6 @@ public class Model extends Observable  {
     TimeSeries timeSeries;
     TimeSeriesAnomalyDetector anomalyDetector;
     PrintWriter out2fg;
-    public UserSettings userSettings;
     Socket fg;
     public HashMap<String, ArrayList<Integer>> setting_map;
     int port;
@@ -25,6 +24,7 @@ public class Model extends Observable  {
     public IntegerProperty timestep;
 
     public Model(String settings) {
+        timestep =new SimpleIntegerProperty();
         setSettings(settings);
 
         // this.userSettings = new UserSettings();
