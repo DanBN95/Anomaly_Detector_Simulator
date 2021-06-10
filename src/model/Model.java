@@ -296,13 +296,15 @@ public class Model extends Observable  {
                     timestep.set(timestep.get()+1);
 
                 }
-            },0,300);
+            },0,500);
         }
     }
 
 
     public void pause() {
-        t.cancel();
+        if(t != null) {
+            t.cancel();
+        }
         t=null;
     }
 

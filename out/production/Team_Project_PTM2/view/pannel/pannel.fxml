@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.layout.AnchorPane?>
+
+
+<AnchorPane prefHeight="74.0" prefWidth="585.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.pannel.PannelController">
+    <children>
+        <Button layoutX="188.0" layoutY="24.0" mnemonicParsing="false" onAction="#play" text="Play" />
+        <Button layoutX="226.0" layoutY="24.0" mnemonicParsing="false" onAction="#pause" prefHeight="25.0" prefWidth="50.0" text="Pause" />
+        <Button layoutX="275.0" layoutY="24.0" mnemonicParsing="false" onAction="#stop" prefHeight="25.0" prefWidth="50.0" text="Stop" />
+    </children>
+</AnchorPane>

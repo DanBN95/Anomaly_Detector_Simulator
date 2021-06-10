@@ -51,8 +51,9 @@ public class ViewModel implements Observer {
 
         selected_feature = new SimpleStringProperty();
 
-        time_step = new SimpleIntegerProperty(1);
-        this.model.timestep = new SimpleIntegerProperty(this.time_step.getValue());
+        time_step = new SimpleIntegerProperty(0);
+        //this.model.timestep = new SimpleIntegerProperty(this.time_step.getValue());
+        this.model.timestep = this.time_step;
 
         //this.model.timestep.bind(this.time_step);
 
@@ -89,7 +90,7 @@ public class ViewModel implements Observer {
 
     public void setTimeStep(int time_step) {
         System.out.println("timestep from slider: " + time_step);
-        this.model.timestep.set(time_step);
+        //this.model.timestep.set(time_step);
         if(timeSeries!=null){
 
             for (String feature : this.displayVariables.keySet()) {
