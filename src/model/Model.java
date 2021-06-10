@@ -26,7 +26,7 @@ public class Model extends Observable  {
 
     public Model(String settings) {
         setSettings(settings);
-        timestep=new SimpleIntegerProperty();
+
         // this.userSettings = new UserSettings();
        // serializeToXML(userSettings,settings);
        // userSettings = desrializeFromXML(settings);

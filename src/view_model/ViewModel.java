@@ -54,13 +54,13 @@ public class ViewModel implements Observer {
         this.model.addObserver(this);
 
         displayVariables = this.model.showFields();
-        check_settings=new SimpleBooleanProperty();
+        check_settings=new SimpleBooleanProperty(false);
         check_settings.setValue(true);
         selected_feature=new SimpleStringProperty();
 
-        time_step = new SimpleIntegerProperty();
+        time_step = new SimpleIntegerProperty(0);
 
-        this.model.timestep.bind(this.time_step);
+        this.model.timestep=this.time_step;
 
         //  When those features are changing, it evoke a change in the model
 //        this.displayVariables.get("aileron").addListener((o, val, newval) -> model.setAileron((float) newval));
