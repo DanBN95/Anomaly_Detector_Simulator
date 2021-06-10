@@ -87,24 +87,24 @@
             </children>
          </GridPane>
          <Text fx:id="featuresList" fill="WHITE" layoutX="45.0" layoutY="27.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Features List" wrappingWidth="159.0" />
-        </AnchorPane>
-        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="103.0" prefWidth="597.0">
-            <Slider fx:id="slider" blockIncrement="100.0" layoutX="10.0" layoutY="69.0" max="2174.0" onMouseClicked="#changeTimeStep" prefHeight="38.0" prefWidth="1033.0" showTickLabels="true" showTickMarks="true" AnchorPane.leftAnchor="10.666666666666515" AnchorPane.rightAnchor="5.333333333333485" />
-            <TextField layoutX="422.0" layoutY="29.0" prefHeight="25.0" prefWidth="33.0" promptText="0.5" />
-            <Text layoutX="347.0" layoutY="46.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Play Speed" />
-            <Text layoutX="470.0" layoutY="49.0" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 20;" text="00:05:40">
-                <font>
-                    <Font name="Arial Black" size="20.0" />
-                </font>
-            </Text>
 
-            <MenuButton fx:id="choose_Algo" layoutX="28.0" layoutY="36.0" mnemonicParsing="false" text="Choose Algorithm">
+            <MenuButton fx:id="choose_Algo" layoutX="204.0" layoutY="459.0" mnemonicParsing="false" prefHeight="46.0" prefWidth="119.0" text="Algorithm">
                 <items>
                     <MenuItem fx:id="Zscore" mnemonicParsing="false" onAction="#LoadAlgo" text="Algorithm Zscore" />
                     <MenuItem fx:id="Linereg" mnemonicParsing="false" onAction="#LoadAlgo" text="Algorithm Linear regression" />
                     <MenuItem fx:id="Hybrid" mnemonicParsing="false" onAction="#LoadAlgo" text="Algorithm Hybrid" />
                 </items>
             </MenuButton>
+        </AnchorPane>
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="103.0" prefWidth="597.0">
+            <Slider fx:id="slider" blockIncrement="100.0" layoutX="10.0" layoutY="69.0" max="2174.0" onMouseClicked="#changeTimeStep" prefHeight="38.0" prefWidth="1033.0" showTickLabels="true" showTickMarks="true" AnchorPane.leftAnchor="10.666666666666515" AnchorPane.rightAnchor="5.333333333333485" />
+            <TextField layoutX="651.0" layoutY="30.0" prefHeight="25.0" prefWidth="33.0" promptText="0.5" />
+            <Text fill="WHITE" layoutX="576.0" layoutY="47.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Play Speed" />
+            <Text fill="WHITE" layoutX="700.0" layoutY="49.0" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 20;" text="00:05:40">
+                <font>
+                    <Font name="Arial Black" size="20.0" />
+                </font>
+            </Text>
             <Pannel fx:id="pannel"></Pannel>
         </AnchorPane>
     </SplitPane>
