@@ -284,13 +284,17 @@ public class Model extends Observable  {
 
 
     public void pause() {
-        t.cancel();
+        if(t != null) {
+            t.cancel();
+        }
         t=null;
     }
 
 
     public void stop() {
-        t.cancel();
+        if(t != null) {
+            t.cancel();
+        }
         t=null;
         timestep.set(0);
     }

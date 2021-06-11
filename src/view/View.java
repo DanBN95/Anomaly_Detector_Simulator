@@ -47,7 +47,9 @@ public class View implements Initializable {
         @FXML
         Slider rudder, throttle;
         @FXML
-        Button open, connect;
+        Button open;
+        @FXML
+        Button fly;
         @FXML
         Slider slider;
         @FXML
@@ -94,6 +96,7 @@ public class View implements Initializable {
             time_step = new SimpleIntegerProperty();
             selected_feature = new SimpleStringProperty();
             check_settings = new SimpleBooleanProperty();
+
         }
 
     @Override
@@ -113,10 +116,13 @@ public class View implements Initializable {
             this.altitude.bind(vm.getDisplayVariables().get("altitude"));
             this.airSpeed.bind(vm.getDisplayVariables().get("airSpeed"));
             this.heading.bind(vm.getDisplayVariables().get("heading"));
+
             this.time_step.bindBidirectional(vm.time_step);
+            this.time_step.addListener((ob,ov,nv) -> {
+                slider.setValue(time_step.getValue());
+            });
             vm.selected_feature.bind(this.selected_feature);
-//            this.check_settings.bind(vm.check_settings);
-//            check_settings.addListener((o,ov,nv)->initFeature());
+
 
             pannel.controller.onPlay = vm.play;
             pannel.controller.onPause = vm.pause;
@@ -164,7 +170,8 @@ public class View implements Initializable {
                 try {
 
                     if (file.getPath().endsWith(".csv")) {
-                        connect.setDisable(false);
+                        System.out.println("File ends with csv");
+                        this.fly.setDisable(false);
                         vm.setTimeSeries(file);
                     }
                 } catch (Exception e) {
