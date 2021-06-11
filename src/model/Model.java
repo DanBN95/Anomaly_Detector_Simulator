@@ -278,7 +278,7 @@ public class Model extends Observable  {
                     timestep.set(timestep.get()+1);
 
                 }
-            },0,300);
+            },0,500);
         }
     }
 
