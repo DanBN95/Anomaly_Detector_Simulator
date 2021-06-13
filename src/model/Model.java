@@ -1,15 +1,14 @@
 package model;
 
 import PTM1.AnomalyDetector.TimeSeriesAnomalyDetector;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleFloatProperty;
-import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.*;
 import sample.UserSettings;
 import PTM1.Helpclass.TimeSeries;
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class Model extends Observable  {
 
@@ -22,10 +21,12 @@ public class Model extends Observable  {
     String ip;
     Timer t = null;
     public IntegerProperty timestep;
+    public volatile LongProperty time_speed;
 
     public Model(String settings) {
-        timestep =new SimpleIntegerProperty();
+
         setSettings(settings);
+
 
         // this.userSettings = new UserSettings();
        // serializeToXML(userSettings,settings);
@@ -271,14 +272,17 @@ public class Model extends Observable  {
             t.scheduleAtFixedRate(new TimerTask() {
                 @Override
                 public void run() {
-                    System.out.println("sending row "+ timestep.get());
+                    long start = System.nanoTime();
+                    System.out.println("sending row "+ timestep.get() + " with time speed: " + time_speed.get());
                     String row_data = timeSeries.row_array(timestep.get());
                     out2fg.println(row_data);
                     System.out.println(row_data);
                     timestep.set(timestep.get()+1);
+                    long end = System.nanoTime();
+                    System.out.println("********************* Time: " + (end-start)/1000000);
 
                 }
-            },0,500);
+            },0,1000);
         }
     }
 

@@ -21,6 +21,7 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
@@ -57,6 +58,8 @@ public class View implements Initializable {
         @FXML
         ListView<String> fList;
         @FXML
+        TextField play_speed;
+        @FXML
         private NumberAxis x,x1,algo_x;
         @FXML
         private NumberAxis y,y1,algo_y;
@@ -87,6 +90,7 @@ public class View implements Initializable {
         StringProperty selected_feature;
         BooleanProperty check_settings;
 
+
         public View() {
             aileron = new SimpleFloatProperty();
             elevator = new SimpleFloatProperty();
@@ -96,6 +100,7 @@ public class View implements Initializable {
             time_step = new SimpleIntegerProperty();
             selected_feature = new SimpleStringProperty();
             check_settings = new SimpleBooleanProperty();
+
 
         }
 
@@ -118,8 +123,9 @@ public class View implements Initializable {
             this.heading.bind(vm.getDisplayVariables().get("heading"));
 
             this.time_step.bindBidirectional(vm.time_step);
+
             this.time_step.addListener((ob,ov,nv) -> {
-                slider.setValue(time_step.getValue());
+                slider.setValue(time_step.get());
             });
             vm.selected_feature.bind(this.selected_feature);
 
@@ -127,9 +133,10 @@ public class View implements Initializable {
             pannel.controller.onPlay = vm.play;
             pannel.controller.onPause = vm.pause;
             pannel.controller.onStop = vm.stop;
+            pannel.controller.runForward = vm.forward;
+            pannel.controller.runBackward = vm.backward;
             initFeature();
             paint();
-
 
         }
 
@@ -216,7 +223,7 @@ public class View implements Initializable {
 
 
         public void changeTimeStep(MouseEvent mouseEvent) {
-            System.out.println("time step has changed");
+            System.out.println("time step has changed by dragging slider");
             this.time_step.set((int) slider.getValue());
             System.out.println(this.time_step);
         }

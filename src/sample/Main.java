@@ -40,7 +40,6 @@ public class Main extends Application {
         View view = fxl.getController();
         Model model = new Model("prop.txt");
         ViewModel vm = new ViewModel(model);
-//        scene.getStylesheets().add(getClass().getResource("C:\\Users\\User\\Desktop\\Dan\\Team_Project_PTM2\\src\\view\\application.css").toExternalForm());
         primaryStage.setTitle("Flight GUI");
 
         primaryStage.setScene(scene);
