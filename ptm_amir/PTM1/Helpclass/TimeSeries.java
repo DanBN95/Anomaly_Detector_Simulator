@@ -2,21 +2,19 @@ package PTM1.Helpclass;
 
 import java.io.*;
 import java.lang.reflect.Array;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Scanner;
-import java.util.Vector;
+import java.util.*;
 
 public class TimeSeries {
 
 	private HashMap<String, float[]> hashMap;
 	private int vector_size;
-
+	String[] feature_list;
 	public int getVector_size() {
 		return vector_size;
 	}
 
 	public TimeSeries(String csvFileName) {
+
 
 		int i=0;
 		boolean eflag=false;
@@ -26,7 +24,8 @@ public class TimeSeries {
 		try {
 			myScanner =new Scanner(new BufferedReader(new FileReader(csvFileName)));
 			String line = myScanner.nextLine(); // read from csv file the features line
-			String [] features=line.split(","); //split the features
+			String [] features=line.split(",");//split the features
+			this.feature_list=features;
 			this.hashMap= new HashMap<String, float[]>();
 			Vector<Vector<Float>> wholeLines=new Vector<Vector<Float>>();
 			for(i=0;i<features.length;i++)
@@ -155,19 +154,22 @@ public class TimeSeries {
 	public String getbest_c_feature(TimeSeries ts, Integer selected_feature_index) {
 		float best_correlated = 0;
 		String save_through_feature = "";
-		String[] features = ts.FeaturesList();
+		String[] features = feature_list;
 		String feature_check = features[selected_feature_index];
 		float[] v_check = ts.getHashMap().get(feature_check);
 		for (int j = 0; j < ts.getHashMap().size(); j++) {
 			if (selected_feature_index == j) {
+
 				continue;
 			}
 			String through_feature = features[j];
+			System.out.println("******************** through feature : " + through_feature);
 			float[] through_v = ts.getHashMap().get(through_feature);
 			if (Math.abs(StatLib.pearson(v_check, through_v)) > best_correlated) {
 				save_through_feature = through_feature;
 			}
 		}
+
 		return save_through_feature;
 	}
 

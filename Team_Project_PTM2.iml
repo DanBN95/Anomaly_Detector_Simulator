@@ -12,5 +12,6 @@
     <orderEntry type="library" name="lib" level="project" />
     <orderEntry type="library" name="lib15" level="project" />
     <orderEntry type="library" exported="" name="lib16" level="project" />
+    <orderEntry type="library" name="Medusa-8.0" level="project" />
   </component>
 </module>

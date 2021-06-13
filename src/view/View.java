@@ -30,6 +30,7 @@ import javafx.scene.paint.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import view.clocks.Clocks;
 import view.linechart.MyLineChart;
 import view.pannel.Pannel;
 import view.joystick.MyJoystick;
@@ -41,9 +42,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class View implements Initializable {
+public class View{
 
-
+        @FXML
+        Clocks clocks;
         @FXML
         Canvas joystick;
         @FXML
@@ -67,29 +69,15 @@ public class View implements Initializable {
         @FXML
         private javafx.scene.chart.LineChart<?,?> CorrelatedFeatureLineChart, FeatureLineChart;
         @FXML
-    MyLineChart myLineChart;
+         MyLineChart myLineChart;
+        @FXML
+        MyJoystick myJoystick;
 
 
-
-
-//    @FXML
-//    private NumberAxis x,x1,algo_x;
-//    @FXML
-//    private NumberAxis y,y1,algo_y;
-//    @FXML
-//    private LineChart CorrelatedFeatureLineChart, FeatureLineChart,Algolinechart;
-//    @FXML
-//    MyJoystick myJoystick;
-//    @FXML
-//    MyCircleChart mycirclechart;
-////    @FXML
-////    private javafx.scene.chart.BubbleChart<?,?> algoFeatureLineChart;
-//    @FXML
-//        private Canvas co;
 
         ViewModel vm;
         double mx, my;
-        FloatProperty aileron, elevator, altitude, airSpeed, heading;
+        FloatProperty aileron, elevator, altitude, airSpeed, heading, yaw, roll, pitch;
         IntegerProperty time_step;
         DoubleProperty time_speed;
         StringProperty selected_feature;
@@ -103,6 +91,9 @@ public class View implements Initializable {
             altitude = new SimpleFloatProperty();
             airSpeed = new SimpleFloatProperty();
             heading = new SimpleFloatProperty();
+            yaw = new SimpleFloatProperty();
+            roll = new SimpleFloatProperty();
+            pitch = new SimpleFloatProperty();
             time_step = new SimpleIntegerProperty();
             time_speed = new SimpleDoubleProperty();
             selected_feature = new SimpleStringProperty();
@@ -111,30 +102,34 @@ public class View implements Initializable {
 
         }
 
-    @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
- /*       int[] x={1,2,3,4,5};
-        int[] y={23,10,30,14,50};
-        int[] y1={50,2,12,10,34};
-        FeatureGraphPaint(x,y);
-        CorrelatedFeatureGraphPaint(x,y1);*/
-    }
+
         public void init(ViewModel vm) {
             this.vm = vm;
-            this.rudder.valueProperty().bind(vm.getDisplayVariables().get("rudder"));
+           /* this.rudder.valueProperty().bind(vm.getDisplayVariables().get("rudder"));
             this.throttle.valueProperty().bind(vm.getDisplayVariables().get("throttle"));
-            this.aileron.bind(vm.getDisplayVariables().get("aileron"));
-            this.elevator.bind(vm.getDisplayVariables().get("elevator"));
+            /*this.aileron.bind(vm.getDisplayVariables().get("aileron"));
+            this.elevator.bind(vm.getDisplayVariables().get("elevator"));*/
+            myJoystick.rudder.bind(vm.getDisplayVariables().get("rudder"));
+            myJoystick.throttle.bind(vm.getDisplayVariables().get("throttle"));
+            myJoystick.aileron.bind(vm.getDisplayVariables().get("aileron"));
+            myJoystick.elevator.bind(vm.getDisplayVariables().get("elevator"));
             this.altitude.bind(vm.getDisplayVariables().get("altitude"));
             this.airSpeed.bind(vm.getDisplayVariables().get("airSpeed"));
             this.heading.bind(vm.getDisplayVariables().get("heading"));
+            this.yaw.bind(vm.getDisplayVariables().get("yaw"));
+            this.roll.bind(vm.getDisplayVariables().get("roll"));
+            this.pitch.bind(vm.getDisplayVariables().get("pitch"));
+
 
             this.time_step.bindBidirectional(vm.time_step);
             this.time_speed.bind(vm.time_speed);
-            this.time_speed.addListener((ob,ov,nv) -> text_speed.setText("x" + nv.toString()));
+            this.time_speed.addListener((ob,ov,nv) ->
+                text_speed.setText("x" + nv.toString())
+            );
 
             this.time_step.addListener((ob,ov,nv) -> {
                 slider.setValue(time_step.get());
+                setVariables();
             });
 
             vm.check_for_paint.addListener((o,ov,nv)->
@@ -150,9 +145,22 @@ public class View implements Initializable {
             pannel.controller.runForward = vm.forward;
             pannel.controller.runBackward = vm.backward;
             initFeature();
-            paint();
+            //paint();
 
         }
+
+    public void setVariables(){
+            System.out.println("hhhhhhhh");
+            System.out.println(airSpeed.get()+" "+this.altitude.get()+" "+altitude.get());
+            //clocks.setvalues();
+
+            clocks.controller.gauge1.setValue((double)this.airSpeed.get());
+        clocks.controller.gauge2.setValue((double)this.altitude.get());
+        clocks.controller.gauge3.setValue((double)this.heading.get());
+        clocks.controller.gauge4.setValue((double)this.yaw.get());
+        clocks.controller.gauge5.setValue((double)this.roll.get());
+        clocks.controller.gauge6.setValue((double)this.pitch.get());
+    }
 
         public void paint() { // To do: attach joystick to features: aileron,elevators
             GraphicsContext gc = joystick.getGraphicsContext2D();
@@ -272,6 +280,7 @@ public class View implements Initializable {
                 public void changed(ObservableValue<? extends String> observableValue, String s, String t1) {
                     selected_feature.setValue(fList.getSelectionModel().getSelectedItem());
                     System.out.println(fList.getSelectionModel().getSelectedItem() + " was selected");
+                    vm.setBest_c_feature(selected_feature.getValue());
                 }
 
 

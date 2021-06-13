@@ -139,7 +139,8 @@ public class ViewModel implements Observer {
             for (String feature : this.displayVariables.keySet()) {
                 displayVariables.get(feature).setValue(timeSeries.valueAtIndex(time_step,this.model.setting_map.get(feature).get(0)));
             }
-            if(selected_feature!=null) {
+            if(selected_feature.getValue()!=null) {
+                System.out.println("this is the selected feature"+selected_feature);
                 selected_feature_vector = model.getSelected_vector(selected_feature.getValue());
                 Best_c_feature_vector = model.getBest_cor_Selected_vector(best_c_feature);
             }

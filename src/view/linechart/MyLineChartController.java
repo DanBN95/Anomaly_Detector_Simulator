@@ -28,7 +28,6 @@ public class MyLineChartController {
     }
 
     public void paint(List<Float> vals, List<Float> vals2) {
-        System.out.println("vector changed");
         if (vals != null) {
             series.getData().add(new XYChart.Data(vals.size() - 1, vals.get(vals.size() - 1)));
         }
