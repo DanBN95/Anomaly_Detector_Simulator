@@ -45,6 +45,7 @@ public class ViewModel implements Observer {
 
     public IntegerProperty time_step;
     public LongProperty time_speed;
+    public DoubleProperty time;
 
 
     private HashMap<String,SimpleFloatProperty> displayVariables;
@@ -52,6 +53,14 @@ public class ViewModel implements Observer {
     public StringProperty selected_feature;
     public BooleanProperty check_settings;
     private ScheduledExecutorService scheduledExecutorService;
+
+
+    public String best_c_feature;
+
+    public List<Float> selected_feature_vector;
+    public List<Float> Best_c_feature_vector;
+
+    public BooleanProperty check_for_paint;
 
 
 
@@ -63,14 +72,18 @@ public class ViewModel implements Observer {
         displayVariables = this.model.showFields();
         check_settings=new SimpleBooleanProperty(false);
         check_settings.setValue(true);
-        selected_feature=new SimpleStringProperty();
+        selected_feature = new SimpleStringProperty();
+        time = new SimpleDoubleProperty();
 
         time_step = new SimpleIntegerProperty(0);
-        time_speed = new SimpleLongProperty(1);
+        time_speed = new SimpleLongProperty(1000);
+        this.time.setValue(1);
 
         model.timestep = this.time_step;
         model.time_speed = this.time_speed;
         x = 1;
+
+        check_for_paint = new SimpleBooleanProperty(true);
 
 
         //  When those features are changing, it evoke a change in the model
@@ -90,50 +103,21 @@ public class ViewModel implements Observer {
         play = ()-> model.play();
         stop = ()-> model.stop();
         pause = ()-> model.pause();
-        forward = ()-> this.changeReadInterval(0.25);
-        backward = ()-> this.changeReadInterval(-0.25);
+        forward = ()-> this.changeTimeSpeed(0.25);
+        backward = ()-> this.changeTimeSpeed(-0.25);
 
     }
 
-    //  to do: set timer to thread here
-    public void changeReadInterval(double time)
-    {
-        if(x >= 0.25 && x <= 2)
-        {
-            if (futureTask != null)
-            {
-                x += time;
-                this.time_speed.set((long)time + time_speed.getValue());
-                System.out.println("current time: " + time);
-                System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<< change read Interval function " + x);
 
-                futureTask.cancel(true);
-            }
+    synchronized public void changeTimeSpeed(double time) {
+        if(this.time.get() >= 0.25 && this.time.get() <= 2) {
+            System.out.println("change time speed ");
+            this.time.setValue(this.time.get() + time);
+            model.pause();
 
-            futureTask = scheduledExecutorService.scheduleAtFixedRate(play, 0,1000/(long) x, TimeUnit.MILLISECONDS );
+            time_speed.set((long)(1000 / this.time.get()));
+            model.play();
         }
-    }
-
-
-    // 500, 750, 1000, 1750 2000
-    public void changeTimeSpeed(int change) {
-        if(time_speed.get() == 500 && change > 0)
-            this.time_speed.set(750);
-        else if(time_speed.get() == 750)
-            this.time_speed.set(time_speed.get() - (long)change);
-        else if(time_speed.get() == 1000 && change > 0)
-            this.time_speed.set(300);
-        else if(time_speed.get() == 1000 && change < 0)
-            this.time_speed.set(1750);
-        else if(time_speed.get() == 1750 && change > 0)
-            this.time_speed.set(1000);
-        else if(time_speed.get() == 1750 && change < 0)
-            this.time_speed.set(2000);
-        else if(time_speed.get() == 2000 && change < 0) {
-            this.time_speed.set(1750);
-            System.out.println("Minimum time speed: " + time_speed.get() + "!");
-        }
-        System.out.println("current time speed is: " + time_speed.get());
     }
 
     public void connect2fg(){
@@ -150,10 +134,15 @@ public class ViewModel implements Observer {
     public void setTimeStep(int time_step) {
         System.out.println("timestep from slider: " + time_step);
         this.model.timestep.set(time_step);
-        if(timeSeries!=null){
+        if(timeSeries !=null){
+            check_for_paint.setValue(!check_for_paint.getValue());
             for (String feature : this.displayVariables.keySet()) {
-                    displayVariables.get(feature).setValue(timeSeries.valueAtIndex(time_step,this.model.setting_map.get(feature).get(0)));
-                 }
+                displayVariables.get(feature).setValue(timeSeries.valueAtIndex(time_step,this.model.setting_map.get(feature).get(0)));
+            }
+            if(selected_feature!=null) {
+                selected_feature_vector = model.getSelected_vector(selected_feature.getValue());
+                Best_c_feature_vector = model.getBest_cor_Selected_vector(best_c_feature);
+            }
         }
     }
 //        aileron.setValue(timeSeries.valueAtIndex(time_step, "aileron"));
@@ -186,6 +175,9 @@ public class ViewModel implements Observer {
         this.model.setAnomalyDetevtor(anomalyDetector);
     }
 
+    public void setBest_c_feature(String selected_feature) {
+        this.best_c_feature = this.model.getBest_c_feature(selected_feature);
+    }
 
 
 //    public Runnable getpainter(){

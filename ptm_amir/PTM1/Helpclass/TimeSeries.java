@@ -152,5 +152,24 @@ public class TimeSeries {
 
 	}
 
+	public String getbest_c_feature(TimeSeries ts, Integer selected_feature_index) {
+		float best_correlated = 0;
+		String save_through_feature = "";
+		String[] features = ts.FeaturesList();
+		String feature_check = features[selected_feature_index];
+		float[] v_check = ts.getHashMap().get(feature_check);
+		for (int j = 0; j < ts.getHashMap().size(); j++) {
+			if (selected_feature_index == j) {
+				continue;
+			}
+			String through_feature = features[j];
+			float[] through_v = ts.getHashMap().get(through_feature);
+			if (Math.abs(StatLib.pearson(v_check, through_v)) > best_correlated) {
+				save_through_feature = through_feature;
+			}
+		}
+		return save_through_feature;
+	}
+
 }
 

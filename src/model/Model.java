@@ -272,17 +272,14 @@ public class Model extends Observable  {
             t.scheduleAtFixedRate(new TimerTask() {
                 @Override
                 public void run() {
-                    long start = System.nanoTime();
                     System.out.println("sending row "+ timestep.get() + " with time speed: " + time_speed.get());
                     String row_data = timeSeries.row_array(timestep.get());
                     out2fg.println(row_data);
                     System.out.println(row_data);
                     timestep.set(timestep.get()+1);
-                    long end = System.nanoTime();
-                    System.out.println("********************* Time: " + (end-start)/1000000);
 
                 }
-            },0,1000);
+            },0,time_speed.get());
         }
     }
 
@@ -313,5 +310,31 @@ public class Model extends Observable  {
         }
             System.out.println(scores.keySet());
             return scores;
+    }
+
+    public List<Float> getSelected_vector(String selected_feature){
+        List<Float> val_list = new LinkedList<>();
+
+        String feature_name = timeSeries.FeaturesList()[setting_map.get(selected_feature).get(0)];
+        float[] selected_feature_vals = Arrays.copyOfRange(timeSeries.getHashMap().get(feature_name),0,timestep.getValue()+1);
+        for (float val:selected_feature_vals) {
+            val_list.add(val);
+        }
+        return val_list;
+    }
+
+    public List<Float> getBest_cor_Selected_vector(String selected_feature){
+        List<Float> val_list = new LinkedList<>();
+        float[] selected_feature_vals = Arrays.copyOfRange(timeSeries.getHashMap().get(selected_feature),0,timestep.getValue()+1);
+        for (float val:selected_feature_vals) {
+            val_list.add(val);
+        }
+        return val_list;
+    }
+
+    public String getBest_c_feature(String selected_feature){
+        String best_c_feature = timeSeries.getbest_c_feature(timeSeries,setting_map.get(selected_feature).get(0));
+        return best_c_feature;
+
     }
 }

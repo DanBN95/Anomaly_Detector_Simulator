@@ -30,6 +30,7 @@ import javafx.scene.paint.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import view.linechart.MyLineChart;
 import view.pannel.Pannel;
 import view.joystick.MyJoystick;
 import view_model.ViewModel;
@@ -58,13 +59,16 @@ public class View implements Initializable {
         @FXML
         ListView<String> fList;
         @FXML
-        TextField play_speed;
+        TextField text_speed;
         @FXML
         private NumberAxis x,x1,algo_x;
         @FXML
         private NumberAxis y,y1,algo_y;
         @FXML
         private javafx.scene.chart.LineChart<?,?> CorrelatedFeatureLineChart, FeatureLineChart;
+        @FXML
+    MyLineChart myLineChart;
+
 
 
 
@@ -87,8 +91,10 @@ public class View implements Initializable {
         double mx, my;
         FloatProperty aileron, elevator, altitude, airSpeed, heading;
         IntegerProperty time_step;
+        DoubleProperty time_speed;
         StringProperty selected_feature;
         BooleanProperty check_settings;
+
 
 
         public View() {
@@ -98,19 +104,20 @@ public class View implements Initializable {
             airSpeed = new SimpleFloatProperty();
             heading = new SimpleFloatProperty();
             time_step = new SimpleIntegerProperty();
+            time_speed = new SimpleDoubleProperty();
             selected_feature = new SimpleStringProperty();
             check_settings = new SimpleBooleanProperty();
-
+            text_speed = new TextField();
 
         }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        int[] x={1,2,3,4,5};
+ /*       int[] x={1,2,3,4,5};
         int[] y={23,10,30,14,50};
         int[] y1={50,2,12,10,34};
         FeatureGraphPaint(x,y);
-        CorrelatedFeatureGraphPaint(x,y1);
+        CorrelatedFeatureGraphPaint(x,y1);*/
     }
         public void init(ViewModel vm) {
             this.vm = vm;
@@ -123,10 +130,17 @@ public class View implements Initializable {
             this.heading.bind(vm.getDisplayVariables().get("heading"));
 
             this.time_step.bindBidirectional(vm.time_step);
+            this.time_speed.bind(vm.time_speed);
+            this.time_speed.addListener((ob,ov,nv) -> text_speed.setText("x" + nv.toString()));
 
             this.time_step.addListener((ob,ov,nv) -> {
                 slider.setValue(time_step.get());
             });
+
+            vm.check_for_paint.addListener((o,ov,nv)->
+                  myLineChart.paint(vm.selected_feature_vector,vm.Best_c_feature_vector)
+           );
+
             vm.selected_feature.bind(this.selected_feature);
 
 
@@ -189,35 +203,48 @@ public class View implements Initializable {
 
 
         public void LoadAlgo() {
-//
-//
-//        Stage stage = new Stage();
-//        stage.setTitle("choose Algorithem");
+
+            //        Stage stage = new Stage();
+//        stage.setTitle("Select Algo Class File");
 //        final FileChooser fileChooser = new FileChooser();
 //
 //        File file = fileChooser.showOpenDialog(stage);
 //        if (file != null) {
-////        String input, className;
-////        System.out.println("enter a class directory");
+//
 //            try {
-////            BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-////            input = in.readLine(); // get user input
-////            System.out.println("enter the class name");
-////            className = in.readLine();
-////            in.close();
-////// load class directory
+//                System.out.println(file.getPath());
+//                System.out.println(file.getAbsolutePath());
+//                System.out.println(file.getCanonicalPath());
+//                String str = file.getPath();
+//                String separator = "\\";
+//                String [] path_parts = str.replaceAll(Pattern.quote(separator), "\\\\").split("\\\\");
+//                String Algo_class_name = path_parts[path_parts.length-1];
+//
+//
+//
+//
+//                StringBuffer sb = new StringBuffer();
+//                sb.append("file://");
+//                for (int i =0;i<path_parts.length-1;i++){
+//                    sb.append(path_parts[i]+"/");
+//               }
+//                String algo_path = sb.toString();
+//
+//               System.out.println(algo_path);
+//            try{
+//                String input,className;
+//                System.out.println("enter a class directory");
+//                BufferedReader in=new BufferedReader(new InputStreamReader(System.in));
+//                input=in.readLine(); // get user input
+//                System.out.println("enter the class name");
+//                className=in.readLine();
+//                in.close();
 //                URLClassLoader urlClassLoader = URLClassLoader.newInstance(new URL[]{
-//                        new URL(file.getPath())
+//                        new URL("file://"+"C:/Users/user/IdeaProjects/Anomaly_Detector_Simulator/ptm_amir/")
 //                });
-//                String[] classnames = file.getPath().split("/");
-//                String className = classnames[classnames.length-1];
-//                Class<?> c = urlClassLoader.loadClass(className);
+//                Class<?> c = urlClassLoader.loadClass("PTM1.AnomalyDetector.SimpleAnomalyDetector");
 //                TimeSeriesAnomalyDetector Ts = (TimeSeriesAnomalyDetector) c.newInstance();
 //                vm.setAnomalyDetector(Ts);
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        }
 
         }
 
@@ -250,7 +277,7 @@ public class View implements Initializable {
 
             });
         }
-        public void FeatureGraphPaint(int [] x,int [] y){
+       /* public void FeatureGraphPaint(int [] x,int [] y){
             XYChart.Series series = new XYChart.Series();
             for(int i=0; i<x.length; i++){
                 series.getData().add(new XYChart.Data(x[i],y[i]));
@@ -266,7 +293,9 @@ public class View implements Initializable {
             }
             series.setName("Correlation");
             CorrelatedFeatureLineChart.getData().addAll(series);
-        }
+        }*/
+
+
 
 
 }
