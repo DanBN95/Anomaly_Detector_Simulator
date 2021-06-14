@@ -24,7 +24,10 @@ public class MyLineChartController {
 
     public void addseries() {
         FeatureLineChart.getData().add(series);
+        series.setName("Feature");
         CorrelatedFeatureLineChart.getData().add(series2);
+        series2.setName("Correlation");
+
     }
 
     public void paint(List<Float> vals, List<Float> vals2) {

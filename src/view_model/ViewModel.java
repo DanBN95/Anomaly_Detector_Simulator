@@ -21,12 +21,8 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.List;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.concurrent.*;
 
 
@@ -62,6 +58,10 @@ public class ViewModel implements Observer {
 
     public BooleanProperty check_for_paint;
 
+    /// for the popup alert in case the settings file of the user is not good
+    public BooleanProperty check_for_settings = new SimpleBooleanProperty(true);
+    public BooleanProperty settings_ok = new SimpleBooleanProperty(false);
+
 
 
     public ViewModel(Model m) {
@@ -76,7 +76,7 @@ public class ViewModel implements Observer {
         time = new SimpleDoubleProperty();
 
         time_step = new SimpleIntegerProperty(0);
-        time_speed = new SimpleLongProperty(1000);
+        time_speed = new SimpleLongProperty(100);
         this.time.setValue(1);
 
         model.timestep = this.time_step;
@@ -115,7 +115,7 @@ public class ViewModel implements Observer {
             this.time.setValue(this.time.get() + time);
             model.pause();
 
-            time_speed.set((long)(1000 / this.time.get()));
+            time_speed.set((long)(100 / this.time.get()));
             model.play();
         }
     }
@@ -128,11 +128,13 @@ public class ViewModel implements Observer {
         this.file = f;
         this.timeSeries = new TimeSeries(file.getPath());
         model.setTimeSeries(this.timeSeries);
+        System.out.println("VM line 131: feature list is: ");
+        for(String s : timeSeries.FeaturesList())
+            System.out.print(s + ", ");
     }
 
 
     public void setTimeStep(int time_step) {
-        System.out.println("timestep from slider: " + time_step);
         this.model.timestep.set(time_step);
         if(timeSeries !=null){
             check_for_paint.setValue(!check_for_paint.getValue());
@@ -180,6 +182,18 @@ public class ViewModel implements Observer {
         this.best_c_feature = this.model.getBest_c_feature(selected_feature);
     }
 
+    ///  the function send the settings file to the model for checking validation and setting the properties
+    public void sendSettingsToModel(File f){
+        if(this.model.CheckSettings(f)){
+            System.out.println("the settings check succeeded");
+            this.model.setSettings(f.getPath());
+            settings_ok.set(!settings_ok.get());
+        }
+        else{
+            System.out.println("the settings check failed");
+            check_for_settings.set(!check_for_settings.get());
+        }
+    }
 
 //    public Runnable getpainter(){
 //        return ()->this.model.getAnomalyDetector().paint(this.timeSeries);

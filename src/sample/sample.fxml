@@ -24,21 +24,35 @@
 <?import view.linechart.MyLineChart?>
 <?import view.clocks.Clocks?>
 <?import view.joystick.MyJoystick?>
+<?import view.algoGraph.MyAlgoGraph?>
+<?import view.featureList.MyFeatureList?>
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="718.0" prefWidth="1051.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.View">
     <SplitPane fx:id="myancor" dividerPositions="0.7359437751004017" orientation="VERTICAL" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="584.0" prefWidth="1204.0">
             <Pane layoutX="192.0" layoutY="119.0" prefHeight="163.0" prefWidth="244.0" />
-            <Button fx:id="open" layoutX="11.0" layoutY="459.0" mnemonicParsing="false" onAction="#openBtnPreesed" prefHeight="46.0" prefWidth="86.0" text="Open" />
-            <Button fx:id="fly" disable="true" layoutX="106.0" layoutY="459.0" mnemonicParsing="false" onAction="#connectFg" prefHeight="46.0" prefWidth="86.0" text="Fly!" />
-         <ListView fx:id="fList" layoutX="10.0" layoutY="44.0" prefHeight="405.0" prefWidth="182.0" />
-             <LineChart layoutX="377.0" layoutY="282.0" prefHeight="221.0" prefWidth="332.0">
+            <Button fx:id="settings" layoutX="10.0" layoutY="459.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="70.0" text="UploadSettings" onAction="#uploadSettings" />
+            <Button fx:id="open" layoutX="90.0" layoutY="459.0" mnemonicParsing="false" onAction="#openBtnPreesed" prefHeight="50.0" prefWidth="70.0" text="Open" />
+            <Button fx:id="fly" disable="true" layoutX="169.0" layoutY="459.0" mnemonicParsing="false" onAction="#connectFg" prefHeight="50.0" prefWidth="70.0" text="Fly!" />
+            <MenuButton fx:id="choose_Algo" layoutX="251.0" layoutY="459.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="119.0" text="Algorithm">
+                <items>
+                    <MenuItem fx:id="Zscore" mnemonicParsing="false" onAction="#LoadAlgo" text="Algorithm Zscore" />
+                    <MenuItem fx:id="Linereg" mnemonicParsing="false" onAction="#LoadAlgo" text="Algorithm Linear regression" />
+                    <MenuItem fx:id="Hybrid" mnemonicParsing="false" onAction="#LoadAlgo" text="Algorithm Hybrid" />
+                </items>
+            </MenuButton>
+            <ListView fx:id="fList" layoutX="10.0" layoutY="44.0" prefHeight="405.0" prefWidth="182.0" />
+          <!--  <MyFeatureList fx:id="myFeatureList"></MyFeatureList>-->
+            <Pane layoutX="364.0" layoutY="258.0" prefHeight="261.0" prefWidth="367.0">
+                <MyAlgoGraph fx:id="myAlgoGraph"></MyAlgoGraph>
+            </Pane>
+             <!--<LineChart layoutX="377.0" layoutY="282.0" prefHeight="221.0" prefWidth="332.0">
                  <xAxis>
                      <NumberAxis side="BOTTOM" />
                  </xAxis>
                  <yAxis>
                      <NumberAxis side="LEFT" />
                  </yAxis>
-             </LineChart>
+             </LineChart>-->
          <!--<Pane layoutX="529.0" layoutY="31.0" prefHeight="230.0" prefWidth="290.0" AnchorPane.leftAnchor="529.0" AnchorPane.rightAnchor="256.0">
             <children>
                     <LineChart fx:id="CorrelatedFeatureLineChart" layoutX="-13.0" prefHeight="230.0" prefWidth="290.0">
@@ -88,25 +102,10 @@
                 </children>
             </GridPane>
          <Text fx:id="featuresList" fill="WHITE" layoutX="45.0" layoutY="27.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Features List" wrappingWidth="159.0" />
+        </AnchorPane>
+<!--       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="103.0" prefWidth="597.0">-->
 
-            <MenuButton fx:id="choose_Algo" layoutX="204.0" layoutY="459.0" mnemonicParsing="false" prefHeight="46.0" prefWidth="119.0" text="Algorithm">
-                <items>
-                    <MenuItem fx:id="Zscore" mnemonicParsing="false" onAction="#LoadAlgo" text="Algorithm Zscore" />
-                    <MenuItem fx:id="Linereg" mnemonicParsing="false" onAction="#LoadAlgo" text="Algorithm Linear regression" />
-                    <MenuItem fx:id="Hybrid" mnemonicParsing="false" onAction="#LoadAlgo" text="Algorithm Hybrid" />
-                </items>
-            </MenuButton>
-        </AnchorPane>
-        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="103.0" prefWidth="597.0">
-            <Slider fx:id="slider" blockIncrement="100.0" layoutX="10.0" layoutY="69.0" max="2174.0" onMouseClicked="#changeTimeStep" prefHeight="38.0" prefWidth="1033.0" showTickLabels="true" showTickMarks="true" AnchorPane.leftAnchor="10.666666666666515" AnchorPane.rightAnchor="5.333333333333485" />
-            <TextField fx:id="text_speed" layoutX="651.0" layoutY="30.0" prefHeight="25.0" prefWidth="33.0" promptText="x1" />
-            <Text fill="WHITE" layoutX="576.0" layoutY="47.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Play Speed" />
-            <Text fill="WHITE" layoutX="700.0" layoutY="49.0" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-size: 20;" text="00:05:40">
-                <font>
-                    <Font name="Arial Black" size="20.0" />
-                </font>
-            </Text>
             <Pannel fx:id="pannel"></Pannel>
-        </AnchorPane>
+
     </SplitPane>
 </AnchorPane>

@@ -21,24 +21,29 @@ public class MyJoystickController {
     @FXML
     Slider rudder,throttle;
 
-    public DoubleProperty aileron,elevator,altitude,airSpeed,heading;
+    public FloatProperty aileron,elevator,rudd,throt;
 
     double mx,my;
 
     public MyJoystickController(){
-        aileron=new SimpleDoubleProperty();
-        elevator=new SimpleDoubleProperty();
+
+        aileron=new SimpleFloatProperty();
+        elevator=new SimpleFloatProperty();
+        throt = new SimpleFloatProperty(0);
+        rudd = new SimpleFloatProperty(0);
 
     }
 
     public void paint() { // To do: attach joystick to features: aileron,elevators
-        System.out.println("aileron:"+aileron);
-        System.out.println("elevator:"+elevator);
 
+        System.out.println("painting my joystick");
         GraphicsContext gc = joystick.getGraphicsContext2D();
 
-        mx = joystick.getWidth() / 2 +aileron.getValue();
-        my = joystick.getHeight() / 2 +elevator.getValue();
+        gc.clearRect(mx-50 , my-50, 100, 100);
+        mx = joystick.getWidth() / 2 + aileron.getValue()*100;
+        my = joystick.getHeight() / 2 + elevator.getValue()*100;
+        System.out.println("mx: " + mx + ", my: " + my);
+
 
 
         // gc.strokeOval(mx - 50, my - 50, 100, 100); //painting a circle
@@ -49,6 +54,12 @@ public class MyJoystickController {
                 CycleMethod.NO_CYCLE, stops1);
         gc.setFill(lg1);
 
-        gc.fillOval(mx - 50, my - 50, 100, 100);
+
+        gc.fillOval(mx-25 , my-25, 50, 50);
+
+        rudder.setValue((double)rudd.get());
+        System.out.println("rudder change to: " + rudd.get());
+        throttle.setValue((double)throt.get());
+        System.out.println("throttle changed to: " + throt.get());
     }
 }

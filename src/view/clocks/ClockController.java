@@ -7,11 +7,13 @@ import javafx.fxml.FXML;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 
+import java.util.HashMap;
+
 public class ClockController {
 
     @FXML
     BorderPane airspeed, altitude, heading, yaw, roll, pitch;
-
+    public HashMap<String,Gauge> gaugeMap;
 
     public Gauge gauge1;
     public Gauge gauge2;
@@ -111,6 +113,14 @@ public class ClockController {
                 .animated(true)
                 .build();
         pitch.setCenter(gauge6);
+
+        gaugeMap = new HashMap<>();
+        gaugeMap.put("airSpeed",gauge1);
+        gaugeMap.put("altitude",gauge2);
+        gaugeMap.put("heading",gauge3);
+        gaugeMap.put("yaw",gauge4);
+        gaugeMap.put("roll",gauge5);
+        gaugeMap.put("pitch",gauge6);
     }
 
 

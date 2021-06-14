@@ -1,12 +1,36 @@
 package view.pannel;
 
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.fxml.FXML;
+import javafx.scene.control.Slider;
+import javafx.scene.control.TextField;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.text.Text;
 
 import java.awt.*;
 
 public class PannelController {
 
+    public IntegerProperty time_step;
+    public DoubleProperty time_speed;
     public Runnable onPlay, onPause, onStop,runForward,runBackward;
+    @FXML
+    public Slider slider;
+    @FXML
+    public TextField text_speed;
+    @FXML
+    public Text runtimeDisplay;
+
+    public PannelController() {
+
+        time_step = new SimpleIntegerProperty();
+        time_speed = new SimpleDoubleProperty();
+        text_speed = new TextField();
+        runtimeDisplay = new Text();
+    }
 
 
     public void play(){
@@ -32,6 +56,12 @@ public class PannelController {
     public void backward() {
         if(runBackward != null)
             runBackward.run();
+    }
+
+    public void changeTimeStep(MouseEvent mouseEvent) {
+        System.out.println("time step has changed by dragging slider");
+        this.time_step.set((int) slider.getValue());
+        System.out.println(this.time_step);
     }
 
 }

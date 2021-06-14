@@ -88,8 +88,9 @@ public class TimeSeries {
 	public HashMap<String,float []> getHashMap() {return this.hashMap;} //returns pointer to csv
 
 	public String[] FeaturesList() { //return Keys of csv
-		String[] keys=this.hashMap.keySet().toArray(new String[hashMap.size()]);
-		return keys;
+		if(feature_list != null)
+			return feature_list;
+		return null;
 	}
 
 	//return the equal size of all vectors

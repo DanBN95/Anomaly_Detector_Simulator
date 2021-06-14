@@ -20,23 +20,25 @@ import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.control.Button;
-import javafx.scene.control.Slider;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import view.clocks.Clocks;
+import view.featureList.MyFeatureList;
 import view.linechart.MyLineChart;
 import view.pannel.Pannel;
 import view.joystick.MyJoystick;
 import view_model.ViewModel;
+
+import java.io.BufferedReader;
 import java.io.File;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
@@ -47,96 +49,65 @@ public class View{
         @FXML
         Clocks clocks;
         @FXML
-        Canvas joystick;
-        @FXML
-        Slider rudder, throttle;
-        @FXML
         Button open;
         @FXML
         Button fly;
         @FXML
-        Slider slider;
-        @FXML
         Pannel pannel;
         @FXML
+    MyFeatureList myFeatureList;
+        @FXML
         ListView<String> fList;
-        @FXML
-        TextField text_speed;
-        @FXML
-        private NumberAxis x,x1,algo_x;
-        @FXML
-        private NumberAxis y,y1,algo_y;
-        @FXML
-        private javafx.scene.chart.LineChart<?,?> CorrelatedFeatureLineChart, FeatureLineChart;
         @FXML
          MyLineChart myLineChart;
         @FXML
         MyJoystick myJoystick;
-
-
-
         ViewModel vm;
-        double mx, my;
-        FloatProperty aileron, elevator, altitude, airSpeed, heading, yaw, roll, pitch;
-        IntegerProperty time_step;
-        DoubleProperty time_speed;
         StringProperty selected_feature;
         BooleanProperty check_settings;
 
 
 
         public View() {
-            aileron = new SimpleFloatProperty();
-            elevator = new SimpleFloatProperty();
-            altitude = new SimpleFloatProperty();
-            airSpeed = new SimpleFloatProperty();
-            heading = new SimpleFloatProperty();
-            yaw = new SimpleFloatProperty();
-            roll = new SimpleFloatProperty();
-            pitch = new SimpleFloatProperty();
-            time_step = new SimpleIntegerProperty();
-            time_speed = new SimpleDoubleProperty();
             selected_feature = new SimpleStringProperty();
             check_settings = new SimpleBooleanProperty();
-            text_speed = new TextField();
-
         }
 
 
         public void init(ViewModel vm) {
             this.vm = vm;
-           /* this.rudder.valueProperty().bind(vm.getDisplayVariables().get("rudder"));
-            this.throttle.valueProperty().bind(vm.getDisplayVariables().get("throttle"));
-            /*this.aileron.bind(vm.getDisplayVariables().get("aileron"));
-            this.elevator.bind(vm.getDisplayVariables().get("elevator"));*/
-            myJoystick.rudder.bind(vm.getDisplayVariables().get("rudder"));
-            myJoystick.throttle.bind(vm.getDisplayVariables().get("throttle"));
-            myJoystick.aileron.bind(vm.getDisplayVariables().get("aileron"));
-            myJoystick.elevator.bind(vm.getDisplayVariables().get("elevator"));
-            this.altitude.bind(vm.getDisplayVariables().get("altitude"));
-            this.airSpeed.bind(vm.getDisplayVariables().get("airSpeed"));
-            this.heading.bind(vm.getDisplayVariables().get("heading"));
-            this.yaw.bind(vm.getDisplayVariables().get("yaw"));
-            this.roll.bind(vm.getDisplayVariables().get("roll"));
-            this.pitch.bind(vm.getDisplayVariables().get("pitch"));
 
-
-            this.time_step.bindBidirectional(vm.time_step);
-            this.time_speed.bind(vm.time_speed);
-            this.time_speed.addListener((ob,ov,nv) ->
-                text_speed.setText("x" + nv.toString())
-            );
-
-            this.time_step.addListener((ob,ov,nv) -> {
-                slider.setValue(time_step.get());
-                setVariables();
+            myJoystick.joystickMap.forEach((f,p)-> {
+                myJoystick.joystickMap.get(f).bind(vm.getDisplayVariables().get(f));
             });
+            myJoystick.joystickMap.forEach((f,p) -> {
+                    myJoystick.joystickMap.get(f).addListener((ob,ov,nv)->myJoystick.myJoystickController.paint());
+            });
+
+
+            //binding clocks params: airspeed, altitude, heading, yaw, roll, pitch to vm
+           clocks.clocksMap.forEach((f,p) -> clocks.clocksMap.get(f).bind(vm.getDisplayVariables().get(f)));
+           clocks.clocksMap.forEach((f,p) -> clocks.clocksMap.get(f).addListener((ob,ov,nv)->clocks.setValues(f,(float)nv)));
+
+            pannel.controller.time_speed.bind(vm.time_speed);
+            this.vm.time.addListener((ob,ov,nv) ->
+                    pannel.controller.text_speed.setText("x" + nv.toString()));
+
+
+
+            pannel.controller.time_step.bindBidirectional(vm.time_step);
+            pannel.controller.time_step.addListener((ob,ov,nv) -> pannel.changeTimeStep());
+
 
             vm.check_for_paint.addListener((o,ov,nv)->
                   myLineChart.paint(vm.selected_feature_vector,vm.Best_c_feature_vector)
            );
 
             vm.selected_feature.bind(this.selected_feature);
+
+            ///  a listener in case the settings file uploaded succeed
+            vm.check_for_settings.addListener((o,ov,nv)->popupSettings());
+            vm.settings_ok.addListener((o,ov,nv)->popupToOpenFile());
 
 
             pannel.controller.onPlay = vm.play;
@@ -145,123 +116,129 @@ public class View{
             pannel.controller.runForward = vm.forward;
             pannel.controller.runBackward = vm.backward;
             initFeature();
-            //paint();
+
 
         }
 
     public void setVariables(){
-            System.out.println("hhhhhhhh");
-            System.out.println(airSpeed.get()+" "+this.altitude.get()+" "+altitude.get());
-            //clocks.setvalues();
+            System.out.println("setVar check line 165");
+            clocks.clocksMap.forEach((f,p) -> {
+                int i = 1;
+                String gaugeI = "gauge" + i;
+                System.out.println("gaugeI is : " + gaugeI);
+                clocks.controller.gaugeMap.get(gaugeI).setValue((double)(clocks.clocksMap.get(f).get()));
+                i++;
+            });
 
-            clocks.controller.gauge1.setValue((double)this.airSpeed.get());
-        clocks.controller.gauge2.setValue((double)this.altitude.get());
-        clocks.controller.gauge3.setValue((double)this.heading.get());
-        clocks.controller.gauge4.setValue((double)this.yaw.get());
-        clocks.controller.gauge5.setValue((double)this.roll.get());
-        clocks.controller.gauge6.setValue((double)this.pitch.get());
     }
 
-        public void paint() { // To do: attach joystick to features: aileron,elevators
-            GraphicsContext gc = joystick.getGraphicsContext2D();
-
-            mx = joystick.getWidth() / 2;
-            my = joystick.getHeight() / 2;
-
-           // gc.strokeOval(mx - 50, my - 50, 100, 100); //painting a circle
-            var stops1 = new Stop[] { new Stop(0, Color.ALICEBLUE),
-                    new Stop(1, Color.BLACK)};
-
-            var lg1 = new RadialGradient(0, 0, 0.5, 0.5, 0.8, true,
-                    CycleMethod.NO_CYCLE, stops1);
-            gc.setFill(lg1);
-
-            gc.fillOval(mx - 50, my - 50, 100, 100);
 
 
 
-        }
-
-
-        public void connectFg() {
+    // the function checks if the flightgear is running
+    // and send notification to the view-model to connect
+    public void connectFg() {
+        if(checkFlightGearProcess()==true){
             vm.connect2fg();
         }
+        else{
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Error");
+            alert.setHeaderText("Please Open FlightGear App!");
+            alert.showAndWait();
+        }
+    }
 
-        public void openBtnPreesed() {
+    ///
+    public void openBtnPreesed() {
 
-            Stage stage = new Stage();
-            stage.setTitle("File chooser sample");
+        Stage stage = new Stage();
+        stage.setTitle("File chooser sample");
 
-            final FileChooser fileChooser = new FileChooser();
+        final FileChooser fileChooser = new FileChooser();
 
-            File file = fileChooser.showOpenDialog(stage);
-            if (file != null) {
-                try {
-
-                    if (file.getPath().endsWith(".csv")) {
-                        System.out.println("File ends with csv");
-                        this.fly.setDisable(false);
-                        vm.setTimeSeries(file);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
+        File file = fileChooser.showOpenDialog(stage);
+        if (file != null) {
+            try {
+                if (file.getPath().endsWith(".csv")) {
+                    System.out.println("File ends with csv");
+                    this.fly.setDisable(false);
+                    vm.setTimeSeries(file);
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
+    }
+
+    /// the function checks if the flightGear process is running in the background
+    public static boolean checkFlightGearProcess() {
+        String line;
+        String pidInfo ="";
+        Process p = null;
+
+        try {
+            p = Runtime.getRuntime().exec(System.getenv("windir") +"\\system32\\"+"tasklist.exe");
+            BufferedReader input =  new BufferedReader(new InputStreamReader(p.getInputStream()));
+            while ((line = input.readLine()) != null) {
+                pidInfo+=line;
+            }
+            input.close();
+
+            if(pidInfo.contains("fgfs")) {
+                System.out.println("Found FlightGear process.");
+                return true;
+            } else {
+                System.out.println("Couldn't find FlightGear process");
+                return false;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /// the function open a dialog with the user to upload settinngs file and send it to the view-model
+    public void uploadSettings(){
+        Stage stage = new Stage();
+        stage.setTitle("File chooser sample");
+
+        final FileChooser fileChooser = new FileChooser();
+
+        File file = fileChooser.showOpenDialog(stage);
+
+        if(file!=null){
+            if (file.getPath().endsWith(".txt")){
+                System.out.println("accepting the props file");
+                vm.sendSettingsToModel(file);
+            }
+            else{
+                popupSettings();
+            }
+        }
+    }
+
+    /// the function alert that there is a problem with the settings file that uplaoded
+    public void popupSettings(){
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Error");
+        alert.setHeaderText("There is a problem with the settings file");
+        alert.setContentText("Using default settings");
+        alert.showAndWait();
+    }
+
+
+    /// the function responsible to alert the user to upload csv file after uploaded the settings file
+    public void popupToOpenFile(){
+
+    }
 
 
         public void LoadAlgo() {
-
-            //        Stage stage = new Stage();
-//        stage.setTitle("Select Algo Class File");
-//        final FileChooser fileChooser = new FileChooser();
-//
-//        File file = fileChooser.showOpenDialog(stage);
-//        if (file != null) {
-//
-//            try {
-//                System.out.println(file.getPath());
-//                System.out.println(file.getAbsolutePath());
-//                System.out.println(file.getCanonicalPath());
-//                String str = file.getPath();
-//                String separator = "\\";
-//                String [] path_parts = str.replaceAll(Pattern.quote(separator), "\\\\").split("\\\\");
-//                String Algo_class_name = path_parts[path_parts.length-1];
-//
-//
-//
-//
-//                StringBuffer sb = new StringBuffer();
-//                sb.append("file://");
-//                for (int i =0;i<path_parts.length-1;i++){
-//                    sb.append(path_parts[i]+"/");
-//               }
-//                String algo_path = sb.toString();
-//
-//               System.out.println(algo_path);
-//            try{
-//                String input,className;
-//                System.out.println("enter a class directory");
-//                BufferedReader in=new BufferedReader(new InputStreamReader(System.in));
-//                input=in.readLine(); // get user input
-//                System.out.println("enter the class name");
-//                className=in.readLine();
-//                in.close();
-//                URLClassLoader urlClassLoader = URLClassLoader.newInstance(new URL[]{
-//                        new URL("file://"+"C:/Users/user/IdeaProjects/Anomaly_Detector_Simulator/ptm_amir/")
-//                });
-//                Class<?> c = urlClassLoader.loadClass("PTM1.AnomalyDetector.SimpleAnomalyDetector");
-//                TimeSeriesAnomalyDetector Ts = (TimeSeriesAnomalyDetector) c.newInstance();
-//                vm.setAnomalyDetector(Ts);
-
         }
 
 
-        public void changeTimeStep(MouseEvent mouseEvent) {
-            System.out.println("time step has changed by dragging slider");
-            this.time_step.set((int) slider.getValue());
-            System.out.println(this.time_step);
-        }
+
 
 
         public void initFeature() {
@@ -286,23 +263,7 @@ public class View{
 
             });
         }
-       /* public void FeatureGraphPaint(int [] x,int [] y){
-            XYChart.Series series = new XYChart.Series();
-            for(int i=0; i<x.length; i++){
-                series.getData().add(new XYChart.Data(x[i],y[i]));
-            }
-            series.setName("Feature");
-            FeatureLineChart.getData().addAll(series);
-        }
 
-        public void CorrelatedFeatureGraphPaint(int [] x,int [] y){
-            XYChart.Series series = new XYChart.Series();
-            for(int i=0; i<x.length; i++){
-                series.getData().add(new XYChart.Data(x[i],y[i]));
-            }
-            series.setName("Correlation");
-            CorrelatedFeatureLineChart.getData().addAll(series);
-        }*/
 
 
 

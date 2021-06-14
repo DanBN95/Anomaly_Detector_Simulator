@@ -46,7 +46,7 @@
 
 .slider .thumb{
     -fx-background-color: #292929;
-    -fx-font-size: 15;
+    -fx-font-size: 20;
 }
 /*.slider {
  -fx-background-color: yellow;
@@ -115,6 +115,12 @@
 #backward{
     -fx-background-image: url(Assets/backward.png);
     -fx-background-size: 25px;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: 90%;
+}
+#stop{
+    -fx-background-image: url(Assets/stop.png);
+    -fx-background-size: 27px;
     -fx-background-repeat: no-repeat;
     -fx-background-position: 90%;
 }

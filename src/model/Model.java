@@ -257,6 +257,75 @@ public class Model extends Observable  {
         }
     }
 
+    /// the function checks the validation of the settings file the user uploaded
+    public boolean CheckSettings(File f){
+        boolean answer = true;
+        Scanner scanner = null;
+        try{
+            scanner = new Scanner(new BufferedReader(new FileReader(f.getPath())));
+            while (scanner.hasNextLine()){
+                String line = scanner.nextLine();
+                String[] line_in_array = line.split(",");
+                if(line_in_array[0].equals("ip")){
+                    if(!validateIP(line_in_array[1])){
+                        System.out.println("the validation of the ip failed");
+                        answer=false;
+                        break;
+                    }
+                }
+                else if(line_in_array[0].equals("port")){
+                    if(!validatePort(line_in_array[1])){
+                        System.out.println("the validation of the port failed");
+                        answer=false;
+                        break;
+                    }
+                }
+                else if(!(line_in_array.length==4)){
+                    System.out.println("the length of the array is not 4");
+                    answer=false;
+                    break;
+                }
+                else{
+                    for(int i=1; i<=3; i++){
+                        if(!(isNumeric(line_in_array[i]))){
+                            System.out.println("the string is not a number");
+                            answer=false;
+                            break;
+                        }
+                    }
+                }
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        return answer;
+    }
+
+    ///  the function checks if a string is a number
+    public static boolean isNumeric(String s){
+        if (s == null) {
+            return false;
+        }
+        try {
+            double d = Double.parseDouble(s);
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+        return true;
+    }
+
+    ///  the function checks if the IP is valid
+    public static boolean validateIP(final String ip) {
+        String PATTERN = "^((0|1\\d?\\d?|2[0-4]?\\d?|25[0-5]?|[3-9]\\d?)\\.){3}(0|1\\d?\\d?|2[0-4]?\\d?|25[0-5]?|[3-9]\\d?)$";
+        return ip.matches(PATTERN);
+    }
+
+    ///  the function checks if the port is valid
+    public static boolean validatePort(final String ip) {
+        String PATTERN = "^([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$";
+        return ip.matches(PATTERN);
+    }
+
     // Projection Functions:
     public void setTimeSeries(TimeSeries ts) {
         this.timeSeries = ts;
