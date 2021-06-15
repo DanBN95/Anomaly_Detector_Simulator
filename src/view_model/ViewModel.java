@@ -76,7 +76,7 @@ public class ViewModel implements Observer {
         time = new SimpleDoubleProperty();
 
         time_step = new SimpleIntegerProperty(0);
-        time_speed = new SimpleLongProperty(100);
+        time_speed = new SimpleLongProperty((long)model.time_default);
         this.time.setValue(1);
 
         model.timestep = this.time_step;
@@ -84,17 +84,6 @@ public class ViewModel implements Observer {
         x = 1;
 
         check_for_paint = new SimpleBooleanProperty(true);
-
-
-        //  When those features are changing, it evoke a change in the model
-//        this.displayVariables.get("aileron").addListener((o, val, newval) -> model.setAileron((float) newval));
-//        this.displayVariables.get("elevator").addListener((o, val, newval) -> model.setElevator((float) newval));
-//        this.displayVariables.get("rudder").addListener((o, val, newval) -> model.setRudder((float) newval));
-//        this.displayVariables.get("throttle").addListener((o, val, newval) -> model.setThrottle((float) newval));
-//        this.displayVariables.get("airSpeed").addListener((o, val, newval) -> model.setAirSpeed((float) newval));
-//        this.displayVariables.get("heading").addListener((o, val, newval) -> model.setHeading((float) newval));
-
-          //Change in the time step evoke setTime_step function with the new value as a parameter
 
         time_step.addListener((o, ov, nv) -> {
             Platform.runLater(() -> setTimeStep((int) nv));
@@ -110,14 +99,27 @@ public class ViewModel implements Observer {
 
 
     synchronized public void changeTimeSpeed(double time) {
-        if(this.time.get() >= 0.25 && this.time.get() <= 2) {
-            System.out.println("change time speed ");
-            this.time.setValue(this.time.get() + time);
-            model.pause();
+        if(time > 0) {
+            if (this.time.get() >= 0.25 && this.time.get() < 2) {
+                System.out.println("change time speed ");
+                this.time.setValue(this.time.get() + time);
+                model.pause();
 
-            time_speed.set((long)(100 / this.time.get()));
-            model.play();
+                time_speed.set((long) (100 / this.time.get()));
+                model.play();
+            }
         }
+        else if(time < 0) {
+            if (this.time.get() > 0.25 && this.time.get() <= 2) {
+                System.out.println("change time speed ");
+                this.time.setValue(this.time.get() + time);
+                model.pause();
+
+                time_speed.set((long) (100 / this.time.get()));
+                model.play();
+            }
+
+            }
     }
 
     public void connect2fg(){
@@ -148,17 +150,6 @@ public class ViewModel implements Observer {
             }
         }
     }
-//        aileron.setValue(timeSeries.valueAtIndex(time_step, "aileron"));
-//        elevator.setValue(timeSeries.valueAtIndex(time_step, "elevator"));
-//        rudder.setValue(timeSeries.valueAtIndex(time_step, "rudder"));
-//        throttle.setValue(timeSeries.valueAtIndex(time_step, "throttle"));
-//        altitude.setValue(timeSeries.valueAtIndex(time_step, "altitude"));
-//        airSpeed.setValue(timeSeries.valueAtIndex(time_step, "air speed"));
-//        heading.setValue(timeSeries.valueAtIndex(time_step, "heading"));
-
-//    public void setSelected_feature(String new_selected_feature ) {
-//        this.selected_feature = new_selected_feature;
-//    }
 
     public HashMap<String, SimpleFloatProperty> getDisplayVariables() {
         return displayVariables;
@@ -191,7 +182,9 @@ public class ViewModel implements Observer {
         }
         else{
             System.out.println("the settings check failed");
+            System.out.println(check_for_settings);
             check_for_settings.set(!check_for_settings.get());
+            System.out.println(check_for_settings);
         }
     }
 

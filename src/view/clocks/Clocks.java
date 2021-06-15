@@ -1,15 +1,12 @@
 package view.clocks;
 
-import eu.hansolo.medusa.Gauge;
-import eu.hansolo.medusa.GaugeBuilder;
-import eu.hansolo.medusa.Section;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.BorderPane;
+
 import javafx.scene.layout.GridPane;
-import javafx.scene.paint.Color;
+
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -38,8 +35,6 @@ public class Clocks extends AnchorPane {
         }
     }
     public void setValues(String featureName, float newVal) {
-//        clocksMap.get(featureName).setValue((double)newVal);
-        System.out.println("set value to gauge");
         controller.gaugeMap.get(featureName).setValue((double)newVal);
     }
     private void setClocksMap() {

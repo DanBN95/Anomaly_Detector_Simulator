@@ -22,15 +22,12 @@ public class Model extends Observable  {
     Timer t = null;
     public IntegerProperty timestep;
     public volatile LongProperty time_speed;
+    public float time_default;
 
     public Model(String settings) {
 
         setSettings(settings);
 
-
-        // this.userSettings = new UserSettings();
-       // serializeToXML(userSettings,settings);
-       // userSettings = desrializeFromXML(settings);
     }
 
     public void csvToFg(TimeSeries ts) {
@@ -54,6 +51,7 @@ public class Model extends Observable  {
 
     public void setSettings(String settings) {
 
+        time_default = 100;
         setting_map = new HashMap<>();
         Scanner myScanner = null;
         try {
@@ -68,6 +66,11 @@ public class Model extends Observable  {
                 }
                 if(vec_by_row[0].equals("port")){
                     port=Integer.parseInt(vec_by_row[1]);
+                    continue;
+                }
+                if(vec_by_row[0].equals("run speed")) {
+                    time_speed.set(Long.parseLong(vec_by_row[1]));
+                    time_default = Float.parseFloat(vec_by_row[1]);
                     continue;
                 }
                 setting_map.put(vec_by_row[0], new ArrayList<>());
@@ -260,10 +263,12 @@ public class Model extends Observable  {
     /// the function checks the validation of the settings file the user uploaded
     public boolean CheckSettings(File f){
         boolean answer = true;
+        int count_rows = 0;
         Scanner scanner = null;
         try{
             scanner = new Scanner(new BufferedReader(new FileReader(f.getPath())));
             while (scanner.hasNextLine()){
+                count_rows++;
                 String line = scanner.nextLine();
                 String[] line_in_array = line.split(",");
                 if(line_in_array[0].equals("ip")){
@@ -280,6 +285,17 @@ public class Model extends Observable  {
                         break;
                     }
                 }
+                else if(line_in_array[0].equals("run speed")) {
+                    float range = Float.parseFloat(line_in_array[1]);
+                    if(range <= 0 || range >= 3000 || range % 100 != 0) {
+                        System.out.println("run speed out of range!");
+                        answer = false;
+                        break;
+                    }
+                }
+                //*********************************************
+                // Add else if for rum speed validation
+
                 else if(!(line_in_array.length==4)){
                     System.out.println("the length of the array is not 4");
                     answer=false;
@@ -294,6 +310,10 @@ public class Model extends Observable  {
                         }
                     }
                 }
+            }
+            if(count_rows != 13) {
+                System.out.println("Missing/Too many settings!");
+                answer = false;
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();

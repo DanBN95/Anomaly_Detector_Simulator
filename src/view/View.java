@@ -1,32 +1,14 @@
 package view;
 
-import PTM1.AnomalyDetector.TimeSeriesAnomalyDetector;
-import PTM1.Helpclass.Line;
-import PTM1.Helpclass.Point;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.beans.property.FloatProperty;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleFloatProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.chart.CategoryAxis;
-import javafx.scene.chart.LineChart;
-import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.paint.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import sample.anomaly_errors.AnomalyErrors;
 import view.clocks.Clocks;
 import view.featureList.MyFeatureList;
 import view.linechart.MyLineChart;
@@ -39,12 +21,10 @@ import java.io.File;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ResourceBundle;
 
-public class View{
+public class View {
 
         @FXML
         Clocks clocks;
@@ -55,22 +35,26 @@ public class View{
         @FXML
         Pannel pannel;
         @FXML
-    MyFeatureList myFeatureList;
+        MyFeatureList myF;
         @FXML
         ListView<String> fList;
         @FXML
          MyLineChart myLineChart;
         @FXML
         MyJoystick myJoystick;
+
         ViewModel vm;
         StringProperty selected_feature;
         BooleanProperty check_settings;
+        AnomalyErrors anomalyErrors;
 
 
 
         public View() {
             selected_feature = new SimpleStringProperty();
             check_settings = new SimpleBooleanProperty();
+            anomalyErrors = new AnomalyErrors(this);
+
         }
 
 
@@ -99,15 +83,16 @@ public class View{
             pannel.controller.time_step.addListener((ob,ov,nv) -> pannel.changeTimeStep());
 
 
-            vm.check_for_paint.addListener((o,ov,nv)->
-                  myLineChart.paint(vm.selected_feature_vector,vm.Best_c_feature_vector)
-           );
+            vm.check_for_paint.addListener((o,ov,nv)-> {
+                myLineChart.paint(vm.selected_feature_vector, vm.Best_c_feature_vector);
+                myLineChart.myLineChartController.setName(selected_feature.get(),vm.best_c_feature);
+            });
 
             vm.selected_feature.bind(this.selected_feature);
 
             ///  a listener in case the settings file uploaded succeed
             vm.check_for_settings.addListener((o,ov,nv)->popupSettings());
-            vm.settings_ok.addListener((o,ov,nv)->popupToOpenFile());
+            vm.settings_ok.addListener((o,ov,nv)-> popupToOpenFile());
 
 
             pannel.controller.onPlay = vm.play;
@@ -120,23 +105,12 @@ public class View{
 
         }
 
-    public void setVariables(){
-            System.out.println("setVar check line 165");
-            clocks.clocksMap.forEach((f,p) -> {
-                int i = 1;
-                String gaugeI = "gauge" + i;
-                System.out.println("gaugeI is : " + gaugeI);
-                clocks.controller.gaugeMap.get(gaugeI).setValue((double)(clocks.clocksMap.get(f).get()));
-                i++;
-            });
-
+    public ViewModel getVm() {
+        return vm;
     }
 
-
-
-
-    // the function checks if the flightgear is running
-    // and send notification to the view-model to connect
+//     the function checks if the flightgear is running
+//     and send notification to the view-model to connect
     public void connectFg() {
         if(checkFlightGearProcess()==true){
             vm.connect2fg();
@@ -171,7 +145,7 @@ public class View{
         }
     }
 
-    /// the function checks if the flightGear process is running in the background
+//    / the function checks if the flightGear process is running in the background
     public static boolean checkFlightGearProcess() {
         String line;
         String pidInfo ="";
@@ -228,7 +202,7 @@ public class View{
     }
 
 
-    /// the function responsible to alert the user to upload csv file after uploaded the settings file
+//    / the function responsible to alert the user to upload csv file after uploaded the settings file
     public void popupToOpenFile(){
 
     }

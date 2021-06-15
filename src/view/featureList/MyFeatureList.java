@@ -8,12 +8,16 @@ import javafx.scene.layout.Pane;
 
 import java.io.IOException;
 
-public class MyFeatureList extends ListView {
+public class MyFeatureList extends Pane {
+
+    MyFeatureListController myFeatureListController;
+
     MyFeatureList(){
         try{
             FXMLLoader fxl = new FXMLLoader();
-            ListView fl = (ListView) fxl.load(getClass().getResource("MyFeatureList.fxml").openStream());
-            MyFeatureListController myFeatureListController=fxl.getController();
+            System.out.println("MY FEATURE LIST LINE 18");
+            Pane fl = (Pane) fxl.load(getClass().getResource("MyFeatureList.fxml").openStream());
+            myFeatureListController = fxl.getController();
             this.getChildren().add(fl);
 
         } catch (IOException e) {
