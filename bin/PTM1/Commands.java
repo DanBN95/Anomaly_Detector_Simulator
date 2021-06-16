@@ -188,8 +188,8 @@ public class Commands {
 		public void execute() {
 			HybridAnomalyDetector AnomalyDetector = new HybridAnomalyDetector();
 			AnomalyDetector.learnNormal(sharedState.getTimeSeriesTrain());
-			List<AnomalyReport> anDe = AnomalyDetector.detect(sharedState.getTimeSeriesTest());
-			sharedState.setAnomalyReportList(anDe);
+//			List<AnomalyReport> anDe = AnomalyDetector.detect(sharedState.getTimeSeriesTest());
+//			sharedState.setAnomalyReportList(anDe);
 			dio.write("anomaly detection complete.\n");
 		}
 	}

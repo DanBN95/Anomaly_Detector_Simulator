@@ -1,13 +1,26 @@
-/*
-Name: Dan Ben Natan
-ID:313196966
-Last update:17/11/20
- */
 package PTM1.Helpclass;
 
 import  java.lang.Math;
 public class StatLib {
 
+	public static float max(float[] arr){
+		float max = -10000000;
+		for(int i =0;i<arr.length;i++){
+			if(arr[i]>max){
+				max=arr[i];
+			}
+		}
+		return max;
+	}
+	public static float min(float[] arr){
+		float max = 100000000;
+		for(int i =0;i<arr.length;i++){
+			if(arr[i]<max){
+				max=arr[i];
+			}
+		}
+		return max;
+	}
 	// simple average
 	public static float avg(float[] x){
 		float sum=0;
@@ -95,5 +108,15 @@ public class StatLib {
 		else
 			return (y-p.y);
 	}
-	
+
+	public static float checkZScore(float num, Float[] curColToCheck) {
+		float curAvg = 0, curStiya = 0, curZscore = 0;
+		curStiya = (float) Math.sqrt(var(curColToCheck));
+		if (curStiya == 0) {
+			return 0;
+		}
+		curAvg = avg(curColToCheck);
+		curZscore = Math.abs(num - curAvg) / curStiya;
+		return curZscore;
+	}
 }

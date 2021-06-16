@@ -1,14 +1,15 @@
 package PTM1.Helpclass;
 
 import java.io.*;
-import java.lang.reflect.Array;
 import java.util.*;
 
 public class TimeSeries {
 
 	private HashMap<String, float[]> hashMap;
 	private int vector_size;
-	String[] feature_list;
+
+
+	public String[] FeaturesList;
 	public int getVector_size() {
 		return vector_size;
 	}
@@ -25,21 +26,17 @@ public class TimeSeries {
 			myScanner =new Scanner(new BufferedReader(new FileReader(csvFileName)));
 			String line = myScanner.nextLine(); // read from csv file the features line
 			String [] features=line.split(",");//split the features
-			this.feature_list=features;
+			this.FeaturesList =features;
 			this.hashMap= new HashMap<String, float[]>();
 			Vector<Vector<Float>> wholeLines=new Vector<Vector<Float>>();
 			for(i=0;i<features.length;i++)
-
 				wholeLines.add(new Vector<>()); //preparing columns for each feature
 
-			i=0; //initialize i
+			i=0;
 			while(myScanner.hasNextLine()) { //as long file hasn't readed completely
-
 				if(!wholeLines.isEmpty()) {
-
 					String row = myScanner.nextLine();
 					String [] vec_by_row = row.split(",");
-					//System.out.print("line "+count+":\t");
 					for(String s : vec_by_row) {
 						if (i == features.length)
 							i = 0;
@@ -63,7 +60,13 @@ public class TimeSeries {
 				float [] featureVec = new float[size];
 				for(int j=0;j<size;j++)
 					featureVec[j]=v.get(j);
-				this.hashMap.put(features[feature_index],featureVec);
+				if(hashMap.get(features[feature_index])==null){
+					this.hashMap.put(features[feature_index],featureVec);
+				}else{
+					String num = "" + feature_index;
+					this.hashMap.put(features[feature_index]+num,featureVec);
+				}
+
 				feature_index++;
 			}
 			setVector_size(size);
@@ -87,10 +90,8 @@ public class TimeSeries {
 
 	public HashMap<String,float []> getHashMap() {return this.hashMap;} //returns pointer to csv
 
-	public String[] FeaturesList() { //return Keys of csv
-		if(feature_list != null)
-			return feature_list;
-		return null;
+	public String[] getFeaturesList() {
+		return FeaturesList;
 	}
 
 	//return the equal size of all vectors
@@ -111,7 +112,7 @@ public class TimeSeries {
 		Scanner in = new Scanner(row);
 		int i = 0;
 		in.useDelimiter(",");
-		String[] features = FeaturesList();
+		String[] features = getFeaturesList();
 		for (float[] f : this.hashMap.values()) {
 			if (in.hasNext()) {
 				float[] temp = new float[this.vector_size + 1];
@@ -130,7 +131,7 @@ public class TimeSeries {
 		float [] arr = new float[this.hashMap.size()];
 		String str;
 		for(int i=0;i<this.hashMap.size();i++) {
-			arr[i] = valueAtIndex(index, FeaturesList()[i]);
+			arr[i] = valueAtIndex(index, getFeaturesList()[i]);
 		}
 		str = Arrays.toString(arr);
 		return str;
@@ -141,7 +142,7 @@ public class TimeSeries {
 		return this.hashMap.get(feature_key)[timeStep];
 	}
 	public float valueAtIndex(int timeStep, int feature_index) {
-		return valueAtIndex(timeStep,this.FeaturesList()[feature_index]);
+		return valueAtIndex(timeStep,getFeaturesList()[feature_index]);
 	}
 
 
@@ -152,21 +153,21 @@ public class TimeSeries {
 
 	}
 
-	public String getbest_c_feature(TimeSeries ts, Integer selected_feature_index) {
+	public String getbest_c_feature(Integer selected_feature_index) {
 		float best_correlated = 0;
 		String save_through_feature = "";
-		String[] features = feature_list;
+		String[] features = FeaturesList;
 		String feature_check = features[selected_feature_index];
-		float[] v_check = ts.getHashMap().get(feature_check);
-		for (int j = 0; j < ts.getHashMap().size(); j++) {
+		float[] v_check = hashMap.get(feature_check);
+		for (int j = 0; j < hashMap.size(); j++) {
 			if (selected_feature_index == j) {
-
 				continue;
 			}
 			String through_feature = features[j];
-			System.out.println("******************** through feature : " + through_feature);
-			float[] through_v = ts.getHashMap().get(through_feature);
-			if (Math.abs(StatLib.pearson(v_check, through_v)) > best_correlated) {
+			float[] through_v = hashMap.get(through_feature);
+			float curcor=Math.abs(StatLib.pearson(v_check, through_v));
+			if (curcor > best_correlated) {
+				best_correlated=curcor;
 				save_through_feature = through_feature;
 			}
 		}
@@ -174,5 +175,21 @@ public class TimeSeries {
 		return save_through_feature;
 	}
 
-}
+	public String getbest_c_feature(String selected_feature) {
+		float best_correlated = 0;
+		String save_through_feature = "";
+		float[] v_check = hashMap.get(selected_feature);
+		for (int j = 0; j < FeaturesList.length; j++) {
+			if (selected_feature == FeaturesList[j]) { continue;}
+			String through_feature = FeaturesList[j];
+			float[] through_v = hashMap.get(through_feature);
+			float curcor=Math.abs(StatLib.pearson(v_check, through_v));
+			if (curcor > best_correlated) {
+				best_correlated=curcor;
+				save_through_feature = through_feature;
+			}
+		}
+		return save_through_feature;
+	}
 
+}

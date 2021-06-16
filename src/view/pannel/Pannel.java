@@ -30,9 +30,6 @@ public class Pannel extends AnchorPane {
 
     public void changeTimeStep() {
         controller.slider.setValue(controller.time_step.get());
-//        controller.runtimeDisplay.setText("" + controller.time_step.get());
- //       String current_time = "" + controller.time_step.get();
-//        controller.runtimeDisplay.setText("" + DateTimeFormatter.ofPattern(current_time));
         int minutes = controller.time_step.get() / 60;
         int seconds =(int) (controller.time_step.get() - (minutes * 60));
         controller.runtimeDisplay.setText(minutes+":"+seconds);

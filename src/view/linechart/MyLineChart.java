@@ -14,21 +14,16 @@ public class MyLineChart extends Pane {
         try {
             FXMLLoader fxl = new FXMLLoader();
             Pane ap = fxl.load(getClass().getResource("MyLineChart.fxml").openStream());
-            myLineChartController=fxl.getController();
-            myLineChartController.addseries();
+            //ap.getStylesheets().add(getClass().getResource("LineChartStyle.css").toExternalForm());
 
+            myLineChartController=fxl.getController();
+            myLineChartController.add_series();
 
             this.getChildren().add(ap);
 
         } catch (IOException e) {
             e.printStackTrace();
-
         }
-
-
     }
 
-    public void paint(List<Float> vals,List<Float> vals2){
-        myLineChartController.paint(vals,vals2);
-    }
 }

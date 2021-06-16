@@ -1,9 +1,16 @@
 package model;
 
+import PTM1.AnomalyDetector.AnomalyReport;
 import PTM1.AnomalyDetector.TimeSeriesAnomalyDetector;
 import javafx.beans.property.*;
+import javafx.scene.chart.XYChart;
+import sample.Properties;
 import sample.UserSettings;
 import PTM1.Helpclass.TimeSeries;
+
+import java.beans.ExceptionListener;
+import java.beans.XMLDecoder;
+import java.beans.XMLEncoder;
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -12,13 +19,15 @@ import java.util.concurrent.TimeUnit;
 
 public class Model extends Observable  {
 
-    TimeSeries timeSeries;
+    TimeSeries timeSeries,detect_timeSeries;
     TimeSeriesAnomalyDetector anomalyDetector;
     PrintWriter out2fg;
     Socket fg;
     public HashMap<String, ArrayList<Integer>> setting_map;
+    public HashMap<String,List<AnomalyReport>> AnomalyReports;
     int port;
     String ip;
+    public String settings;
     Timer t = null;
     public IntegerProperty timestep;
     public volatile LongProperty time_speed;
@@ -26,7 +35,7 @@ public class Model extends Observable  {
 
     public Model(String settings) {
 
-        setSettings(settings);
+        this.settings = settings;
 
     }
 
@@ -51,8 +60,21 @@ public class Model extends Observable  {
 
     public void setSettings(String settings) {
 
-        time_default = 100;
+        time_default = 200;
         setting_map = new HashMap<>();
+
+        if (settings.contains(".txt"))
+            loadSettingsFromTxt(settings);
+        else if(settings.contains(".xml")) {
+            serializeToXML(settings);
+            System.out.println("serialize success! (Model,line 66)");
+            desrializeFromXML(settings);
+        }
+
+
+    }
+
+    public void loadSettingsFromTxt(String settings) {
         Scanner myScanner = null;
         try {
             myScanner = new Scanner(new BufferedReader(new FileReader(settings)));
@@ -60,184 +82,123 @@ public class Model extends Observable  {
 
                 String line = myScanner.nextLine();
                 String[] vec_by_row = line.split(",");
-                if(vec_by_row[0].equals("ip")){
-                    ip=vec_by_row[1];
+                if (vec_by_row[0].equals("ip")) {
+                    ip = vec_by_row[1];
                     continue;
                 }
-                if(vec_by_row[0].equals("port")){
-                    port=Integer.parseInt(vec_by_row[1]);
+                else if (vec_by_row[0].equals("port")) {
+                    port = Integer.parseInt(vec_by_row[1]);
                     continue;
                 }
-                if(vec_by_row[0].equals("run speed")) {
+                else if (vec_by_row[0].equals("run speed")) {
                     time_speed.set(Long.parseLong(vec_by_row[1]));
                     time_default = Float.parseFloat(vec_by_row[1]);
                     continue;
                 }
+                else if (vec_by_row[0].equals("flight path")) {
+                    timeSeries = new TimeSeries(vec_by_row[1]);
+                    setChanged();
+                    notifyObservers();
+                    System.out.println("notify");
+                    continue;
+                }
                 setting_map.put(vec_by_row[0], new ArrayList<>());
-                int i=0;
+                int i = 0;
                 for (String s : vec_by_row) {
-                    if(i==0){
+                    if (i == 0) {
                         i++;
                         continue;
                     }
                     setting_map.get(vec_by_row[0]).add(Integer.parseInt(s));
                 }
             }
+            myScanner.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-//        try {
-//            String [] strings = InetAddress.getLocalHost().toString().split("/");
-//            userSettings.setIp(strings[1]);
-//            System.out.println(userSettings.getIp());
-//        } catch (UnknownHostException e) {
-//            e.printStackTrace();
-////        }
-//        HashMap<String,Properties> hsm = new HashMap<>();
-//        userSettings.setIp("127.0.0.1");
-//        userSettings.setPort("5400");
-//
-//
-//        userSettings.setHsm(hsm);
-//        String [] features = {"aileron","elevator","rudder","throttle","altitude","airspeed","heading","roll","pitch","yaw"};
-//        int [] index = {0,1,2,6,16,21,19,28,29,20};
-//        float [] max = {1,1,1,1,1}
-//        String [] min = new String[10];
-//        for(String f : features) {
-//            Properties p = new Properties();
-//            hsm.put(f,getProp(p,))
-//        }
-//
-//
-//        Properties properties = new Properties();
-//        properties.setAileron_index(0);
-//        properties.setElevator_index(1);
-//        properties.setRudder_index(2);
-//        properties.setThrottle_index(6);
-//        properties.setAltitude_index(16);
-//        properties.setAirSpeed_index(21);
-//        properties.setHeading_index(19);
-//        properties.setRoll_index(28);
-//        properties.setPitch_index(29);
-//        properties.setYaw_index(20);
-//
-//        properties.setAileron_max(1);
-//        properties.setAileron_min(-1);
-//        properties.setElevator_max(1);
-//        properties.setElevator_min(-1);
-//        properties.setRudder_max(1);
-//        properties.setRudder_min(-1);
-//        properties.setThrottle_max(1);
-//        properties.setThrottle_min(-1);
-//        properties.setAltitude_max(1);
-//        properties.setAltitude_min(-1);
-//        properties.setAirSpeed_max(100000);
-//        properties.setAirSpeed_min(0);
-//        properties.setHeading_max(300);
-//        properties.setHeading_min(100);
-//        properties.setRoll_max(40);
-//        properties.setRoll_min(-38);
-//        properties.setPitch_max(17);
-//        properties.setPitch_min(-10);
-//        properties.setYaw_max(90);
-//        properties.setYaw_min(-30);
-//
-//        userSettings.setProperties(properties);
-//    }
-
-//    public Properties getProp(Properties p,int index,float max, float min) {
-//        p.setIndex(index);
-//        p.setMax(max);
-//        p.setMin(min);
-//        return p;
-//    }
-
-//    public UserSettings desrializeFromXML(String xmlFile) {
-//        try {
-//            BufferedInputStream file = new BufferedInputStream(new FileInputStream(xmlFile));
-//            XMLDecoder decoder = new XMLDecoder(file);
-//            UserSettings decodedSettings = (UserSettings) decoder.readObject();
-//            decoder.close();
-//            file.close();
-//            return decodedSettings;
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        return null;
-//    }
-//
-//    public void serializeToXML(UserSettings us,String settings) {
-//
-//        try {
-//            FileOutputStream fos = new FileOutputStream(settings);
-//            XMLEncoder encoder = new XMLEncoder(fos);
-//            encoder.setExceptionListener(new ExceptionListener() {
-//                @Override
-//                public void exceptionThrown(Exception e) {
-//                    System.out.println("Exception occurred!");
-//                }
-//            });
-//
-//            // writing to xml file
-//            encoder.writeObject(us);
-//            encoder.close();
-//            fos.close();
-//
-//
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        } catch (UnknownHostException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//
-//    public void setAileron(float aileron) {
-//        String command = userSettings.getAileron();
-//        out2fg.println(command+" "+aileron);
-//        out2fg.flush();
-//    }
-//
-//    public void setElevator(float elevator) {
-//        String command = userSettings.getElevator();
-//        out2fg.println(command+" "+elevator);
-//        out2fg.flush();
-//    }
-//
-//    public void setRudder(float rudder) {
-//        String command = userSettings.getRudder();
-//        out2fg.println(command+" "+rudder);
-//        out2fg.flush();
-//    }
-//
-//    public void setThrottle(float throttle) {
-//        String command = userSettings.getThrottle();
-//        out2fg.println(command+" "+throttle);
-//        out2fg.flush();
-//    }
-//
-//    public void setAltitude(float altitude) {
-//        String command = userSettings.getAltitude();
-//        out2fg.println(command+" "+altitude);
-//        out2fg.flush();
-//    }
-//
-//    public void setAirSpeed(float airSpeed) {
-//        String command = userSettings.getAirSpeed();
-//        out2fg.println(command+" "+airSpeed);
-//        out2fg.flush();
-//    }
-//
-//    public void setHeading(float heading) {
-//        String command = userSettings.getHeading();
-//        out2fg.println(command+" "+heading);
-//        out2fg.flush();
-//    }
     }
+
+    public void desrializeFromXML(String xmlFile) {
+        try {
+            BufferedInputStream file = new BufferedInputStream(new FileInputStream(xmlFile));
+            XMLDecoder decoder = new XMLDecoder(file);
+            UserSettings decodedSettings = (UserSettings) decoder.readObject();
+            decoder.close();
+            file.close();
+
+            for(String s : decodedSettings.getHsm().keySet()) {
+                ArrayList<Integer>list = new ArrayList();
+                int index = decodedSettings.getHsm().get(s).getIndex();
+                int max = decodedSettings.getHsm().get(s).getMax();
+                int min = decodedSettings.getHsm().get(s).getMin();
+
+                list.add(0,index);
+                list.add(1,max);
+                list.add(2,min);
+
+                setting_map.put(s,list);
+
+                port = decodedSettings.getPort();
+                ip = decodedSettings.getIp();
+                time_speed.set((long)decodedSettings.getRun_speed());
+                time_default = decodedSettings.getRun_speed();
+                //timeSeries = new TimeSeries()
+            }
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void serializeToXML(String settings) {
+
+        UserSettings us = new UserSettings();
+        HashMap<String, Properties> userProp = new HashMap<>();
+        String [] features = {"aileron","elevator","rudder","throttle","altitude","airSpeed","heading","roll","pitch","yaw"};
+        int [] index = {0,1,2,6,16,21,19,28,29,20};
+        int [] max = {1,1,0,1,860,100,350,40,17,90};
+        int [] min = {-1,-1,0,0,0,0,80,-38,-10,-30};
+        int i = 0;
+        for(String s : features) {
+            Properties p = new Properties();
+            p.setIndex(index[i]);
+            p.setMax(max[i]);
+            p.setMin(min[i]);
+            userProp.put(s,p);
+            i++;
+        }
+        us.setHsm(userProp);
+        us.setIp("127.0.0.1");
+        us.setPort(5400);
+        us.setRun_speed(200);
+        try {
+            FileOutputStream fos = new FileOutputStream(settings);
+            XMLEncoder encoder = new XMLEncoder(fos);
+            encoder.setExceptionListener(new ExceptionListener() {
+                @Override
+                public void exceptionThrown(Exception e) {
+                    System.out.println("Exception occurred encode to XML(Model,line 285)!");
+                }
+            });
+
+            // writing to xml file
+            encoder.writeObject(us);
+            encoder.close();
+            fos.close();
+
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void finalize() {
         try {
             out2fg.close();
@@ -255,7 +216,7 @@ public class Model extends Observable  {
         this.anomalyDetector=ad;
         if(this.timeSeries!=null){
             this.anomalyDetector.learnNormal(this.timeSeries);
-            this.anomalyDetector.detect(this.timeSeries);
+            System.out.println("Finish learning");
 
         }
     }
@@ -311,7 +272,7 @@ public class Model extends Observable  {
                     }
                 }
             }
-            if(count_rows != 13) {
+            if(count_rows != 14) {
                 System.out.println("Missing/Too many settings!");
                 answer = false;
             }
@@ -349,9 +310,16 @@ public class Model extends Observable  {
     // Projection Functions:
     public void setTimeSeries(TimeSeries ts) {
         this.timeSeries = ts;
-        if(this.anomalyDetector!=null){
-            this.anomalyDetector.learnNormal(this.timeSeries);
-            this.anomalyDetector.detect(this.timeSeries);
+        if(anomalyDetector!=null){
+            anomalyDetector.learnNormal(this.timeSeries);
+            System.out.println("Finish learning");
+        }
+    }
+    public void set_detect_TimeSeries(TimeSeries ts) {
+        detect_timeSeries = ts;
+        if(anomalyDetector!=null){
+            AnomalyReports=anomalyDetector.detect(detect_timeSeries);
+            System.out.println("finish detect");
         }
     }
 
@@ -396,34 +364,46 @@ public class Model extends Observable  {
                 scores.put(feature, new SimpleFloatProperty());
             }
         }
-            System.out.println(scores.keySet());
             return scores;
     }
 
-    public List<Float> getSelected_vector(String selected_feature){
-        List<Float> val_list = new LinkedList<>();
-
-        String feature_name = timeSeries.FeaturesList()[setting_map.get(selected_feature).get(0)];
-        float[] selected_feature_vals = Arrays.copyOfRange(timeSeries.getHashMap().get(feature_name),0,timestep.getValue()+1);
-        for (float val:selected_feature_vals) {
-            val_list.add(val);
-        }
-        return val_list;
+    public float[] getSelected_vector(String selected_feature){
+        String feature_name = timeSeries.getFeaturesList()[setting_map.get(selected_feature).get(0)];
+        float[] selected_feature_vals =timeSeries.getHashMap().get(feature_name);
+        return selected_feature_vals;
     }
 
-    public List<Float> getBest_cor_Selected_vector(String selected_feature){
-        List<Float> val_list = new LinkedList<>();
-        float[] selected_feature_vals = Arrays.copyOfRange(timeSeries.getHashMap().get(selected_feature),0,timestep.getValue()+1);
-        for (float val:selected_feature_vals) {
-            val_list.add(val);
-        }
-        return val_list;
+    public float[] getBest_cor_Selected_vector(String selected_feature){
+        String best_c_feature= getBest_c_feature(selected_feature);
+        float[] selected_feature_vals = timeSeries.getHashMap().get(best_c_feature);
+        return selected_feature_vals;
     }
 
     public String getBest_c_feature(String selected_feature){
-        String best_c_feature = timeSeries.getbest_c_feature(timeSeries,setting_map.get(selected_feature).get(0));
-        System.out.println("***************** BEST FEATURE IS : " + best_c_feature);
+        String best_c_feature = timeSeries.getbest_c_feature(setting_map.get(selected_feature).get(0));
         return best_c_feature;
 
+    }
+
+    public List<XYChart.Series> paintAlgo(String selected_featureX){
+
+        String slected_feature_N = timeSeries.getFeaturesList()[setting_map.get(selected_featureX).get(0)];
+        return anomalyDetector.paint(timeSeries,slected_feature_N);
+    }
+//    public List<XYChart.Series> paintdtect(String selected_featureX){
+//        String slected_feature_N = timeSeries.getFeaturesList()[setting_map.get(selected_featureX).get(0)];
+//        return anomalyDetector.detect(timeSeries, slected_feature_N);
+//    }
+
+    public List<AnomalyReport> getAnomalyReports(String selected_feature){
+        return AnomalyReports.get(selected_feature);
+    }
+
+    public TimeSeries getTimeSeries() {
+        return timeSeries;
+    }
+
+    public TimeSeries getDetect_timeSeries() {
+        return detect_timeSeries;
     }
 }

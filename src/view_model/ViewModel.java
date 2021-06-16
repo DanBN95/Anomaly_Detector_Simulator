@@ -1,6 +1,7 @@
 package view_model;
 
 
+import PTM1.AnomalyDetector.AnomalyReport;
 import PTM1.AnomalyDetector.TimeSeriesAnomalyDetector;
 import PTM1.Helpclass.Point;
 import PTM1.Helpclass.TimeSeries;
@@ -13,6 +14,7 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 
+import javafx.scene.chart.XYChart;
 import model.Model;
 
 
@@ -29,8 +31,7 @@ import java.util.concurrent.*;
 public class ViewModel implements Observer {
 
     Model model;
-
-    TimeSeries timeSeries;
+    TimeSeries timeSeries,detect_timeSeries;
     TimeSeriesAnomalyDetector anomalyDetector;
 
     public File file;
@@ -38,6 +39,7 @@ public class ViewModel implements Observer {
     public final Runnable play,pause,stop,forward,backward;
     private ScheduledFuture<?> futureTask;
     public double x;
+
 
     public IntegerProperty time_step;
     public LongProperty time_speed;
@@ -50,18 +52,15 @@ public class ViewModel implements Observer {
     public BooleanProperty check_settings;
     private ScheduledExecutorService scheduledExecutorService;
 
-
-    public String best_c_feature;
-
-    public List<Float> selected_feature_vector;
-    public List<Float> Best_c_feature_vector;
-
-    public BooleanProperty check_for_paint;
-
+    public float[] selected_feature_vector;
+    public float[] Best_c_feature_vector;
+    public List<AnomalyReport> AnomalyReport;
     /// for the popup alert in case the settings file of the user is not good
     public BooleanProperty check_for_settings = new SimpleBooleanProperty(true);
     public BooleanProperty settings_ok = new SimpleBooleanProperty(false);
+    public BooleanProperty display_bool_features;
 
+    public HashMap<String, ArrayList<Integer>> setting_map;
 
 
     public ViewModel(Model m) {
@@ -69,8 +68,8 @@ public class ViewModel implements Observer {
         this.model.addObserver(this);
         scheduledExecutorService = Executors.newScheduledThreadPool(5);
 
-        displayVariables = this.model.showFields();
         check_settings=new SimpleBooleanProperty(false);
+        display_bool_features = new SimpleBooleanProperty(false);
         check_settings.setValue(true);
         selected_feature = new SimpleStringProperty();
         time = new SimpleDoubleProperty();
@@ -78,13 +77,15 @@ public class ViewModel implements Observer {
         time_step = new SimpleIntegerProperty(0);
         time_speed = new SimpleLongProperty((long)model.time_default);
         this.time.setValue(1);
-
         model.timestep = this.time_step;
         model.time_speed = this.time_speed;
         x = 1;
+        model.setSettings(model.settings);
+        displayVariables = new HashMap<>();
+        displayVariables = this.model.showFields();
 
-        check_for_paint = new SimpleBooleanProperty(true);
 
+        Best_c_feature_vector=null;
         time_step.addListener((o, ov, nv) -> {
             Platform.runLater(() -> setTimeStep((int) nv));
         });
@@ -105,7 +106,7 @@ public class ViewModel implements Observer {
                 this.time.setValue(this.time.get() + time);
                 model.pause();
 
-                time_speed.set((long) (100 / this.time.get()));
+                time_speed.set((long) (200 / this.time.get()));
                 model.play();
             }
         }
@@ -114,7 +115,6 @@ public class ViewModel implements Observer {
                 System.out.println("change time speed ");
                 this.time.setValue(this.time.get() + time);
                 model.pause();
-
                 time_speed.set((long) (100 / this.time.get()));
                 model.play();
             }
@@ -126,27 +126,17 @@ public class ViewModel implements Observer {
         model.csvToFg(this.timeSeries);
     }
 
-    public void setTimeSeries(File f) {
-        this.file = f;
-        this.timeSeries = new TimeSeries(file.getPath());
-        model.setTimeSeries(this.timeSeries);
-        System.out.println("VM line 131: feature list is: ");
-        for(String s : timeSeries.FeaturesList())
-            System.out.print(s + ", ");
+    public void set_detect_TimeSeries(File f) {
+        detect_timeSeries = new TimeSeries(f.getPath());
+        model.set_detect_TimeSeries(detect_timeSeries);
     }
 
 
     public void setTimeStep(int time_step) {
         this.model.timestep.set(time_step);
         if(timeSeries !=null){
-            check_for_paint.setValue(!check_for_paint.getValue());
             for (String feature : this.displayVariables.keySet()) {
                 displayVariables.get(feature).setValue(timeSeries.valueAtIndex(time_step,this.model.setting_map.get(feature).get(0)));
-            }
-            if(selected_feature.getValue()!=null) {
-                System.out.println("this is the selected feature"+selected_feature);
-                selected_feature_vector = model.getSelected_vector(selected_feature.getValue());
-                Best_c_feature_vector = model.getBest_cor_Selected_vector(best_c_feature);
             }
         }
     }
@@ -158,7 +148,9 @@ public class ViewModel implements Observer {
 
     @Override
     public void update(Observable o, Object arg) {
-
+        timeSeries = model.getTimeSeries();
+        System.out.println("Time series learn successed");
+        display_bool_features.set(true);
     }
 
     public TimeSeriesAnomalyDetector getAnomalyDetector() {
@@ -169,15 +161,13 @@ public class ViewModel implements Observer {
         this.model.setAnomalyDetevtor(anomalyDetector);
     }
 
-    public void setBest_c_feature(String selected_feature) {
-        this.best_c_feature = this.model.getBest_c_feature(selected_feature);
-    }
 
     ///  the function send the settings file to the model for checking validation and setting the properties
     public void sendSettingsToModel(File f){
         if(this.model.CheckSettings(f)){
             System.out.println("the settings check succeeded");
             this.model.setSettings(f.getPath());
+            this.setting_map=this.model.setting_map;
             settings_ok.set(!settings_ok.get());
         }
         else{
@@ -187,8 +177,31 @@ public class ViewModel implements Observer {
             System.out.println(check_for_settings);
         }
     }
+    public List<XYChart.Series> getpaintAlgo(){
+        selected_feature_vector = model.getSelected_vector(selected_feature.getValue());
+        Best_c_feature_vector = model.getBest_cor_Selected_vector(selected_feature.getValue());
+        AnomalyReport= model.getAnomalyReports(selected_feature.getValue());
+        return this.model.paintAlgo(selected_feature.getValue());
+    }
 
-//    public Runnable getpainter(){
-//        return ()->this.model.getAnomalyDetector().paint(this.timeSeries);
-//    }
+    public float[] get_detect_point(){
+        int cur_timestep =time_step.getValue();
+        float x_val = selected_feature_vector[cur_timestep];
+        if(Best_c_feature_vector==null){return null;}
+        float y_val = Best_c_feature_vector[cur_timestep];
+        if(AnomalyReport!=null){
+          for(int i=0;i<AnomalyReport.size();i++){
+                if(AnomalyReport.get(i).timeStep==cur_timestep){
+                    float[] detect_point= {x_val,y_val, (float) 1};
+                 return detect_point;
+                 }
+          }
+        }
+        float[] detect_point= {x_val,y_val,(float)2};
+        return detect_point;
+    }
+
+    public TimeSeries getTimeSeries() {
+        return timeSeries;
+    }
 }

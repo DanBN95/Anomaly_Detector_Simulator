@@ -7,6 +7,7 @@ import javafx.fxml.FXML;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ClockController {
@@ -123,5 +124,25 @@ public class ClockController {
         gaugeMap.put("pitch",gauge6);
     }
 
+    public void updateMinMax(HashMap<String, ArrayList<Integer>> setting_map){
+        gaugeMap.get("airSpeed").setMaxValue(setting_map.get("airSpeed").get(1));
+        gaugeMap.get("airSpeed").setMinValue(setting_map.get("airSpeed").get(2));
+        gaugeMap.get("airSpeed").setValue(gaugeMap.get("airSpeed").getMinValue()>0?gaugeMap.get("airSpeed").getMinValue():0);
+        gaugeMap.get("altitude").setMaxValue(setting_map.get("altitude").get(1));
+        gaugeMap.get("altitude").setMinValue(setting_map.get("altitude").get(2));
+        gaugeMap.get("altitude").setValue(gaugeMap.get("altitude").getMinValue()>0?gaugeMap.get("altitude").getMinValue():0);
+        gaugeMap.get("heading").setMaxValue(setting_map.get("heading").get(1));
+        gaugeMap.get("heading").setMinValue(setting_map.get("heading").get(2));
+        gaugeMap.get("heading").setValue(gaugeMap.get("heading").getMinValue()>0?gaugeMap.get("heading").getMinValue():0);
+        gaugeMap.get("yaw").setMaxValue(setting_map.get("yaw").get(1));
+        gaugeMap.get("yaw").setMinValue(setting_map.get("yaw").get(2));
+        gaugeMap.get("yaw").setValue(gaugeMap.get("yaw").getMinValue()>0?gaugeMap.get("yaw").getMinValue():0);
+        gaugeMap.get("roll").setMaxValue(setting_map.get("roll").get(1));
+        gaugeMap.get("roll").setMinValue(setting_map.get("roll").get(2));
+        gaugeMap.get("roll").setValue(gaugeMap.get("roll").getMinValue()>0?gaugeMap.get("roll").getMinValue():0);
+        gaugeMap.get("pitch").setMaxValue(setting_map.get("pitch").get(1));
+        gaugeMap.get("pitch").setMinValue(setting_map.get("pitch").get(2));
+        gaugeMap.get("pitch").setValue(gaugeMap.get("pitch").getMinValue()>0?gaugeMap.get("pitch").getMinValue():0);
+    }
 
 }
