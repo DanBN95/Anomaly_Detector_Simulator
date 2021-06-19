@@ -10,18 +10,18 @@
         <ListView fx:id="fList" layoutX="-226" layoutY="-10" prefHeight="405.0" prefWidth="182.0" />
         <LineChart fx:id="CorrelatedFeatureLineChart" layoutX="290.0" layoutY="5.0" prefHeight="230.0" prefWidth="290.0">
             <xAxis>
-                <NumberAxis side="BOTTOM" fx:id="x1" />
+                <NumberAxis side="BOTTOM" fx:id="x_c" />
             </xAxis>
             <yAxis>
-                <NumberAxis fx:id="y1" side="LEFT" />
+                <NumberAxis fx:id="y_c" side="LEFT" />
             </yAxis>
         </LineChart>
         <LineChart fx:id="FeatureLineChart" layoutY="5.0" prefHeight="230.0" prefWidth="290.0">
             <xAxis>
-                <NumberAxis side="BOTTOM" fx:id="x" />
+                <NumberAxis side="BOTTOM" fx:id="x_f" />
             </xAxis>
             <yAxis>
-                <NumberAxis fx:id="y" side="LEFT" />
+                <NumberAxis fx:id="y_f" side="LEFT" />
             </yAxis>
         </LineChart>
     </children>

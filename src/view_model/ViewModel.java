@@ -4,6 +4,7 @@ package view_model;
 import PTM1.AnomalyDetector.AnomalyReport;
 import PTM1.AnomalyDetector.TimeSeriesAnomalyDetector;
 import PTM1.Helpclass.Point;
+import PTM1.Helpclass.StatLib;
 import PTM1.Helpclass.TimeSeries;
 
 import javafx.application.Platform;
@@ -105,7 +106,6 @@ public class ViewModel implements Observer {
                 System.out.println("change time speed ");
                 this.time.setValue(this.time.get() + time);
                 model.pause();
-
                 time_speed.set((long) (200 / this.time.get()));
                 model.play();
             }
@@ -145,7 +145,6 @@ public class ViewModel implements Observer {
         return displayVariables;
     }
 
-
     @Override
     public void update(Observable o, Object arg) {
         timeSeries = model.getTimeSeries();
@@ -177,11 +176,14 @@ public class ViewModel implements Observer {
             System.out.println(check_for_settings);
         }
     }
-    public List<XYChart.Series> getpaintAlgo(){
+    public void set_selected_vectors(){
         selected_feature_vector = model.getSelected_vector(selected_feature.getValue());
         Best_c_feature_vector = model.getBest_cor_Selected_vector(selected_feature.getValue());
+    }
+
+    public List<XYChart.Series> getpaintFunc(){
         AnomalyReport= model.getAnomalyReports(selected_feature.getValue());
-        return this.model.paintAlgo(selected_feature.getValue());
+        return model.paintAlgo(selected_feature.getValue());
     }
 
     public float[] get_detect_point(){

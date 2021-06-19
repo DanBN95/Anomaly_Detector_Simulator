@@ -7,10 +7,10 @@
 <Pane layoutX="364.0" layoutY="258.0" prefHeight="261.0" prefWidth="367.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.algoGraph.MyAlgoGraphController">
     <LineChart fx:id="Algo_line_chart" layoutX="-332.0" layoutY="-238.0" prefHeight="221.0" prefWidth="332.0">
         <xAxis>
-            <NumberAxis side="BOTTOM" />
+            <NumberAxis fx:id="x" side="BOTTOM" />
         </xAxis>
         <yAxis>
-            <NumberAxis side="LEFT" />
+            <NumberAxis fx:id="y" side="LEFT" />
         </yAxis>
     </LineChart>
 </Pane>

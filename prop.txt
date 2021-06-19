@@ -11,4 +11,4 @@ yaw,20,90,-30
 port,5400
 ip,127.0.0.1
 run speed,500
-flight path,C:/Users/User/Desktop/Dan/Team_Project_PTM2/src/reg_flight.csv
+flight path,C:/Users/User/Desktop/anomaly_flight.csv

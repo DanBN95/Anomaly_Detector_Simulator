@@ -101,27 +101,34 @@ public class SimpleAnomalyDetector implements TimeSeriesAnomalyDetector {
 	@Override
 	public List<XYChart.Series> paint(TimeSeries ts, String feature) {
 		List<XYChart.Series> points = new LinkedList<>();
-		XYChart.Series series = new XYChart.Series();
-		XYChart.Series series2 = new XYChart.Series();
+		XYChart.Series learning_points = new XYChart.Series();
+		XYChart.Series algo_points = new XYChart.Series();
+		XYChart.Series setting_algo = new XYChart.Series();
+
+
 		float min,max;
 		float[] selected_f_vals = ts.getHashMap().get(feature);
-		if(best_corlation_couples.containsKey(feature) ){
+		if(best_corlation_couples.containsKey(feature) ) {
 			float[] best_c_f_vals = ts.getHashMap().get(best_corlation_couples.get(feature));
 			Line line = new Line(this.correlatedFeaturesList.get(feature).lin_reg.a, this.correlatedFeaturesList.get(feature).lin_reg.a);
 			for (int i = 0; i < selected_f_vals.length; i++) {
-				series.getData().add(new XYChart.Data(selected_f_vals[i], best_c_f_vals[i]));
+				learning_points.getData().add(new XYChart.Data(selected_f_vals[i], best_c_f_vals[i]));
 			}
 			min = StatLib.min(selected_f_vals);
 			max = StatLib.max(selected_f_vals);
-			series2.getData().add(new XYChart.Data(min, line.a * min + line.b));
-			series2.getData().add(new XYChart.Data(max, line.a * max + line.b));
-			series.setName("Lerning Points");
-			series2.setName("Line-Reg-Algo");
+			algo_points.getData().add(new XYChart.Data(min, line.a * min + line.b));
+			algo_points.getData().add(new XYChart.Data(max, line.a * max + line.b));
+			setting_algo.getData().add(new XYChart.Data(min, max));
+			setting_algo.getData().add(new XYChart.Data(line.a * min + line.b, line.a * max + line.b));
+			learning_points.setName("Lerning Points");
+			algo_points.setName("Line-Reg-Algo");
+			setting_algo.setName("setting-Algo");
+			points.add(learning_points);
+			points.add(algo_points);
+			points.add(setting_algo);
+			return points;
 		}
-
-		points.add(series);
-		points.add(series2);
-		return points;
+		return null;
 	}
 
 	public List<XYChart.Series> detect_P(TimeSeries ts,String feature,int time_step){
@@ -139,6 +146,7 @@ public class SimpleAnomalyDetector implements TimeSeriesAnomalyDetector {
 		}else{
 			series.getData().add(new XYChart.Data(x,y));
 		}
+
 		detect_points.add(series);
 		detect_points.add(series1);
 		return detect_points;

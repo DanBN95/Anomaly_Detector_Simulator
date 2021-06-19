@@ -331,7 +331,7 @@ public class Model extends Observable  {
                 public void run() {
                     System.out.println("sending row "+ timestep.get() + " with time speed: " + time_speed.get());
                     String row_data = timeSeries.row_array(timestep.get());
-                    out2fg.println(row_data);
+                    //out2fg.println(row_data);
                     timestep.set(timestep.get()+1);
 
                 }
@@ -368,26 +368,23 @@ public class Model extends Observable  {
     }
 
     public float[] getSelected_vector(String selected_feature){
-        String feature_name = timeSeries.getFeaturesList()[setting_map.get(selected_feature).get(0)];
+        String feature_name = setting_map.containsKey(selected_feature) ? timeSeries.getFeaturesList()[setting_map.get(selected_feature).get(0)] : selected_feature;
         float[] selected_feature_vals =timeSeries.getHashMap().get(feature_name);
         return selected_feature_vals;
     }
 
     public float[] getBest_cor_Selected_vector(String selected_feature){
-        String best_c_feature= getBest_c_feature(selected_feature);
-        float[] selected_feature_vals = timeSeries.getHashMap().get(best_c_feature);
+        String best_c_feature = setting_map.containsKey(selected_feature)? timeSeries.getbest_c_feature(setting_map.get(selected_feature).get(0)) : timeSeries.getbest_c_feature(selected_feature);
+        float[] selected_feature_vals=null;
+        if(best_c_feature!=null)
+             selected_feature_vals = timeSeries.getHashMap().get(best_c_feature);
         return selected_feature_vals;
     }
 
-    public String getBest_c_feature(String selected_feature){
-        String best_c_feature = timeSeries.getbest_c_feature(setting_map.get(selected_feature).get(0));
-        return best_c_feature;
-
-    }
 
     public List<XYChart.Series> paintAlgo(String selected_featureX){
 
-        String slected_feature_N = timeSeries.getFeaturesList()[setting_map.get(selected_featureX).get(0)];
+        String slected_feature_N = setting_map.containsKey(selected_featureX)? timeSeries.getFeaturesList()[setting_map.get(selected_featureX).get(0)]:selected_featureX;
         return anomalyDetector.paint(timeSeries,slected_feature_N);
     }
 //    public List<XYChart.Series> paintdtect(String selected_featureX){

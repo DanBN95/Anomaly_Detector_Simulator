@@ -132,15 +132,15 @@ public class View {
 //     the function checks if the flightgear is running
 //     and send notification to the view-model to connect
     public void connectFg() {
-        if(checkFlightGearProcess()==true){
-            vm.connect2fg();
-        }
-        else{
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Error");
-            alert.setHeaderText("Please Open FlightGear App!");
-            alert.showAndWait();
-        }
+//        if(checkFlightGearProcess()==true){
+//            vm.connect2fg();
+//        }
+//        else{
+//            Alert alert = new Alert(Alert.AlertType.WARNING);
+//            alert.setTitle("Error");
+//            alert.setHeaderText("Please Open FlightGear App!");
+//            alert.showAndWait();
+//        }
     }
 
     ///
@@ -231,6 +231,7 @@ public class View {
 
 
     public void LoadAlgo() {
+            //לבדוק אם עובד ולעשות עצור.
         Stage stage = new Stage();
         stage.setTitle("Select Algo Class File");
         final FileChooser fileChooser = new FileChooser();
@@ -265,13 +266,12 @@ public class View {
                         class_b.append(x);
                     }
                 }
-                if(classname != null) {
-                    System.out.println("View 267: clear");
-                    Platform.runLater(() -> {
-                        myAlgoGraph.myAlgoGraphController.clear();
-                        myAlgoGraph.myAlgoGraphController.add_data(vm.getpaintAlgo());
-                    });
-                }
+//                if(classname != null) {
+//                    System.out.println("View 267: clear");
+//                    Platform.runLater(() -> {
+//                        myAlgoGraph.myAlgoGraphController.set_algo_setting(vm.getpaintFunc());
+//                    });
+//                }
                 classname = class_b.toString();
                 URLClassLoader urlClassLoader = URLClassLoader.newInstance(new URL[]{
                         new URL(algo_path)
@@ -280,6 +280,7 @@ public class View {
                 TimeSeriesAnomalyDetector Ts = (TimeSeriesAnomalyDetector) c.newInstance();
                 vm.setAnomalyDetector(Ts);
 
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -287,14 +288,12 @@ public class View {
         }
     }
 
-        public void initFeature() {
+    public void initFeature() {
             List<String> features = new LinkedList<>();
 
-            if(vm.display_bool_features.get()) {
-                System.out.println("line 298 view ");
+            if(vm.display_bool_features.get()) { ;
                 for (String feature : this.vm.getTimeSeries().FeaturesList) {
                     features.add(feature);
-                    System.out.println(feature);
                 }
                 myLineChart.myLineChartController.fList.getItems().addAll(features);
             }
@@ -304,13 +303,10 @@ public class View {
                 @Override
                 public void changed(ObservableValue<? extends String> observableValue, String s, String t1) {
                     myLineChart.myLineChartController.selected_feature.setValue(myLineChart.myLineChartController.fList.getSelectionModel().getSelectedItem());
-                    myLineChart.myLineChartController.set_fNames();
+                    vm.set_selected_vectors();
+                    myAlgoGraph.myAlgoGraphController.set_algo_setting(vm.getpaintFunc());
+                    myLineChart.myLineChartController.set_setting(pannel.controller.time_step.getValue(),vm.selected_feature_vector, vm.Best_c_feature_vector);
                     System.out.println(myLineChart.myLineChartController.fList.getSelectionModel().getSelectedItem() + " was selected");
-
-                        myAlgoGraph.myAlgoGraphController.clear();
-                        myAlgoGraph.myAlgoGraphController.add_data(vm.getpaintAlgo());
-                        myLineChart.myLineChartController.getpaint(vm.selected_feature_vector, vm.Best_c_feature_vector);
-
                }
             });
         }

@@ -16,7 +16,7 @@ public class MyAlgoGraph extends Pane {
             Pane algo = fxl.load(getClass().getResource("MyAlgoGraph.fxml").openStream());
             algo.getStylesheets().add(getClass().getResource("AlgoStyle.css").toExternalForm());
             myAlgoGraphController = fxl.getController();
-
+            myAlgoGraphController.add_series();
             this.getChildren().add(algo);
         } catch (IOException e) {
             e.printStackTrace();

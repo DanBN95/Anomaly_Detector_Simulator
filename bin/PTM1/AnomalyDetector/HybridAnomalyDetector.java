@@ -197,50 +197,61 @@ public class HybridAnomalyDetector implements TimeSeriesAnomalyDetector {
     public List<XYChart.Series> paint(TimeSeries ts, String feature) {
         List<XYChart.Series> points = new LinkedList<>();
         float[] selected_f_vals = ts.getHashMap().get(feature);
-        XYChart.Series series = new XYChart.Series<Number, Number>();
-        XYChart.Series series2 = new XYChart.Series<Number, Number>();
+        XYChart.Series learning_points = new XYChart.Series<Number, Number>();
+        XYChart.Series Algo_points = new XYChart.Series<Number, Number>();
+        XYChart.Series setting_algo = new XYChart.Series();
         float min = StatLib.min(selected_f_vals);
         float max = StatLib.max(selected_f_vals);
-        series.setName("Lerning Points");
+        learning_points.setName("Lerning Points");
         if (zscoremap.containsKey(feature)) {
             float zscore = zscoremap.get(feature);
-            series2.setName("Zscore-Algo");
-            series2.getData().add(new XYChart.Data(min, zscore));
-            series2.getData().add(new XYChart.Data(max, zscore));
-            points.add(series);
-            return points;
+            Algo_points.setName("Zscore-Algo");
+            Algo_points.getData().add(new XYChart.Data(0, zscore));
+            Algo_points.getData().add(new XYChart.Data(selected_f_vals.length, zscore));
+            setting_algo.getData().add(new XYChart.Data(0,selected_f_vals.length));
+            setting_algo.getData().add(new XYChart.Data(0,zscore));
+
         }
         else if (LinecorrelatedFeaturesList.containsKey(feature)) {
             float[] best_c_f_vals = ts.getHashMap().get(best_corlation_couples.get(feature));
             Line line = new Line(this.LinecorrelatedFeaturesList.get(feature).lin_reg.a, this.LinecorrelatedFeaturesList.get(feature).lin_reg.a);
             for (int i = 0; i < selected_f_vals.length; i++) {
-                series.getData().add(new XYChart.Data(selected_f_vals[i], best_c_f_vals[i]));
+                learning_points.getData().add(new XYChart.Data(selected_f_vals[i], best_c_f_vals[i]));
             }
-            series2.getData().add(new XYChart.Data(min, line.a * min + line.b));
-            series2.getData().add(new XYChart.Data(max, line.a * max + line.b));
-            series2.setName("Line-Reg-Algo");
+            Algo_points.getData().add(new XYChart.Data(min, line.a * min + line.b));
+            Algo_points.getData().add(new XYChart.Data(max, line.a * max + line.b));
+            setting_algo.getData().add(new XYChart.Data(min,max));
+            setting_algo.getData().add(new XYChart.Data(line.a * min + line.b,line.a * max + line.b));
+            Algo_points.setName("Line-Reg-Algo");
         }
         else if (CirclecorrelatedFeaturesList.containsKey(feature)) {
             float[] best_c_f_vals = ts.getHashMap().get(best_corlation_couples.get(feature));
             for (int i = 0; i < selected_f_vals.length; i++) {
-                series.getData().add(new XYChart.Data(selected_f_vals[i], best_c_f_vals[i]));
+                learning_points.getData().add(new XYChart.Data(selected_f_vals[i], best_c_f_vals[i]));
             }
             Circle circle = new Circle(this.CirclecorrelatedFeaturesList.get(feature).center, this.CirclecorrelatedFeaturesList.get(feature).radius);
             double x, y;
-            for (double s = 0; s < 720; ) {
+            for (double s = 0; s < 360; ) {
                 x = (circle.radius * Math.cos(s) + circle.center.x);
                 y = (circle.radius * Math.sin(s) + circle.center.y);
                 s += 0.5;
-                series2.getData().add(new XYChart.Data(x, y));
+                Algo_points.getData().add(new XYChart.Data(x, y));
             }
-            series2.setName("Circle-Algo");
+            Algo_points.setName("Circle-Algo");
+            setting_algo.getData().add(new XYChart.Data((circle.center.x-circle.radius),(circle.center.x+circle.radius)));
+            setting_algo.getData().add(new XYChart.Data(circle.center.y-circle.radius,circle.center.y+circle.radius));
+
         }
         else {
             System.out.println("problem with learn function");
+            return null;
         }
+        setting_algo.setName("setting-Algo");
+        learning_points.setName("learning-points");
+        points.add(learning_points);
+        points.add(Algo_points);
+        points.add(setting_algo);
 
-        points.add(series);
-        points.add(series2);
         return points;
 
     }

@@ -1,11 +1,11 @@
 .default-color0.chart-series-line { -fx-stroke: transparent; }
-.default-color1.chart-series-line { -fx-stroke: #9d00ff; }
+.default-color1.chart-series-line { -fx-stroke: #9a959b; }
 .default-color2.chart-series-line { -fx-stroke: transparent; }
 .default-color3.chart-series-line { -fx-stroke: transparent; }
 
 
 .default-color0.chart-line-symbol {
-    -fx-background-color: #bcbebd;
+    -fx-background-color: #efeeee;
 }
 .default-color1.chart-line-symbol {
     -fx-background-color: transparent, transparent;
@@ -35,6 +35,6 @@
 
 .chart-plot-background { /*/inside chart bg/*/
 
-    -fx-background-color: #484445;
+    -fx-background-color: #a50e33;
 
 }

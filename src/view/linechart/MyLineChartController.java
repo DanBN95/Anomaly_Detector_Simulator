@@ -1,5 +1,6 @@
 package view.linechart;
 
+import PTM1.Helpclass.StatLib;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -9,9 +10,21 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.ListView;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class MyLineChartController {
+
+
+    @FXML
+    private NumberAxis x_f;
+    @FXML
+    private NumberAxis y_f;
+    @FXML
+    private NumberAxis x_c;
+    @FXML
+    private NumberAxis y_c;
+
 
     @FXML
     private LineChart FeatureLineChart;
@@ -23,50 +36,91 @@ public class MyLineChartController {
 
     XYChart.Series series;
     XYChart.Series series2;
-    float[] f_vals,c_vals;
+    float[] f_vals, c_vals;
+    float max_y_f, max_y_c;
+
     public MyLineChartController() {
         series = new XYChart.Series();
         series2 = new XYChart.Series();
-        selected_feature= new SimpleStringProperty();
-
+        selected_feature = new SimpleStringProperty();
     }
-    public void add_series(){
+
+    public void add_series() {
         FeatureLineChart.getData().add(series);
         CorrelatedFeatureLineChart.getData().add(series2);
     }
 
-    public void set_fNames() {
+    //need cur time val
+    public void set_setting(int curtime, float[] vals, float[] vals2) {
+        clear();
+        //set selected feature linechart setting
+        f_vals = vals;
+        float y_f_min = StatLib.min(vals);
         series.setName("Feature: " + selected_feature.get());
-        series2.setName("Best Correlated Feature: ");
+        x_f.setAutoRanging(false);
+        x_f.setLowerBound(0);
+        x_f.setUpperBound(curtime * (float) (1.1));
+        y_f.setLowerBound(y_f_min);
+        max_y_f = StatLib.max(Arrays.copyOfRange(f_vals, 0, curtime));
+        y_f.setUpperBound(max_y_f * (float) (1.1));
+
+        //set best cor to-selected feature linechart setting
+        c_vals = vals2;
+        if (c_vals != null) {
+            float y_c_min = StatLib.min(vals2);
+            series2.setName("Best Correlated Feature: ");
+            x_c.setAutoRanging(false);
+            x_c.setLowerBound(0);
+            x_c.setUpperBound(curtime * (float) (1.1));
+            y_c.setLowerBound(y_c_min);
+            max_y_c = StatLib.max(Arrays.copyOfRange(c_vals, 0, curtime));
+            y_c.setUpperBound(max_y_c * (float) (1.1));
+        }
+        if(curtime!=0)
+          add_p_paint(0, curtime);
     }
 
-    public void getpaint(float[] vals,float[] vals2) {
-            f_vals=vals;
-            c_vals=vals2;
-    }
-    synchronized public void add_p_paint(int old_time,int new_time){
-        if(old_time<new_time) {
-            for(int i = old_time+1;i<=new_time;i++) {
-                final int j = i;
-                Platform.runLater(() -> {
-                    series.getData().add(new XYChart.Data(j, f_vals[j]));
-                if (c_vals != null) {
-                    series2.getData().add(new XYChart.Data(j, c_vals[j]));
+    synchronized public void add_p_paint(int old_time, int new_time) {
+        Platform.runLater(() -> {
+            if (old_time < new_time) {
+                x_f.setUpperBound(new_time * (float) (1.1));
+                x_c.setUpperBound(new_time * (float) (1.1));
+
+                for (int i = old_time + 1; i <= new_time; i++) {
+                    series.getData().add(new XYChart.Data(i, f_vals[i]));
+                    if (f_vals[i] > max_y_f) {
+                        max_y_f = f_vals[i];
+                        y_f.setUpperBound(max_y_f * (float) (1.1));
+                    }
+
+                    if (c_vals != null) {
+                        series2.getData().add(new XYChart.Data(i, c_vals[i]));
+                        if (c_vals[i] > max_y_c) {
+                            max_y_c = c_vals[i];
+                            y_c.setUpperBound(max_y_c * (float) (1.1));
+                        }
+                    }
+
                 }
-            });
+            } else {
+                for (int i = old_time; i != new_time; i--) {
+                    series.getData().remove(i - 1);
+                    if (c_vals != null)
+                        series.getData().remove(i - 1);
+                }
+                max_y_f = StatLib.max(Arrays.copyOfRange(f_vals, 0, new_time));
+                x_f.setUpperBound(new_time * (float) (1.1));
+                if (c_vals != null) {
+                    max_y_c = StatLib.max(Arrays.copyOfRange(c_vals, 0, new_time));
+                    x_c.setUpperBound(new_time * (float) (1.1));
+                }
             }
-        }else{
-            go_back(new_time);
-        }
+        });
+
     }
-    public void go_back(int index){
+
+    public void clear() {
         series.getData().clear();
         series2.getData().clear();
-            for(int i=0;i<index;i++) {
-                series.getData().add(new XYChart.Data(i, f_vals[i]));
-                if (c_vals != null) {
-                series2.getData().add(new XYChart.Data(i, c_vals[i]));
-            }
-        }
     }
 }

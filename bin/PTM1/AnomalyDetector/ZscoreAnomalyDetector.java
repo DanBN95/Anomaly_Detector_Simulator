@@ -87,8 +87,9 @@ public class ZscoreAnomalyDetector implements TimeSeriesAnomalyDetector {
 
     @Override
     public List<XYChart.Series> paint(TimeSeries ts,String feature){
-        XYChart.Series series = new XYChart.Series<>();
-        XYChart.Series series2 = new XYChart.Series<>();
+        XYChart.Series learning_points = new XYChart.Series<>();
+        XYChart.Series algo_points = new XYChart.Series<>();
+        XYChart.Series setting_algo = new XYChart.Series();
         List<XYChart.Series> points =new LinkedList<>();
         float zscore;
         float min,max;
@@ -97,11 +98,16 @@ public class ZscoreAnomalyDetector implements TimeSeriesAnomalyDetector {
         selected_f_vals= ts.getHashMap().get(feature);
         min =StatLib.min(selected_f_vals);
         max =StatLib.max(selected_f_vals);
-        series2.getData().add(new XYChart.Data(min,zscore));
-        series2.getData().add(new XYChart.Data(max,zscore));
-        series2.setName("Zscore-Algo");
-        points.add(series);
-        points.add(series2);
+        algo_points.getData().add(new XYChart.Data(0,zscore));
+        algo_points.getData().add(new XYChart.Data(selected_f_vals.length,zscore));
+        setting_algo.getData().add(new XYChart.Data(0,0));
+        setting_algo.getData().add(new XYChart.Data(selected_f_vals.length,zscore));
+        algo_points.setName("Zscore-Algo");
+        setting_algo.setName("setting-Algo");
+        learning_points.setName("learning-points");
+        points.add(learning_points);
+        points.add(algo_points);
+        points.add(setting_algo);
         return points;
     }
 

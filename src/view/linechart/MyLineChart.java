@@ -18,7 +18,6 @@ public class MyLineChart extends Pane {
 
             myLineChartController=fxl.getController();
             myLineChartController.add_series();
-
             this.getChildren().add(ap);
 
         } catch (IOException e) {

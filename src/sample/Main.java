@@ -22,7 +22,7 @@ public class Main extends Application {
         Scene scene = new Scene(root);
         scene.getStylesheets().add(getClass().getResource("stylesheet.css").toString());
         View view = fxl.getController();
-        Model model = new Model("C:\\Users\\User\\Desktop\\Dan\\Team_Project_PTM2\\prop.txt");
+        Model model = new Model("prop.txt");
         ViewModel vm = new ViewModel(model);
         primaryStage.setTitle("Flight GUI");
 
