@@ -6,7 +6,6 @@ import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
-import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -14,7 +13,7 @@ import javafx.stage.Stage;
 import sample.anomaly_errors.AnomalyErrors;
 import view.algoGraph.MyAlgoGraph;
 import view.clocks.Clocks;
-import view.linechart.MyLineChart;
+import view.f_list.F_list;
 import view.pannel.Pannel;
 import view.joystick.MyJoystick;
 import view_model.ViewModel;
@@ -32,39 +31,29 @@ import java.util.List;
 public class View {
 
         @FXML
+        MyJoystick myJoystick;
+        @FXML
         Clocks clocks;
+        @FXML
+        Pannel pannel;
+        @FXML
+        F_list flist;
+        @FXML
+        MyAlgoGraph myAlgoGraph;
         @FXML
         Button open;
         @FXML
         Button fly;
-        @FXML
-        Pannel pannel;
-
-        /*@FXML
-        ListView<String> fList;*/
-        @FXML
-         MyLineChart myLineChart;
-        @FXML
-        MyJoystick myJoystick;
-         @FXML
-         MyAlgoGraph myAlgoGraph;
 
 
         ViewModel vm;
-//        StringProperty selected_feature;
         BooleanProperty check_settings;
         AnomalyErrors anomalyErrors;
-        String classname;
         BooleanProperty display_bool_features;
-
-
-
         public View() {
-//            selected_feature = new SimpleStringProperty();
             check_settings = new SimpleBooleanProperty();
             anomalyErrors = new AnomalyErrors(this);
             display_bool_features = new SimpleBooleanProperty();
-
         }
 
 
@@ -72,48 +61,36 @@ public class View {
             this.vm = vm;
 
             this.display_bool_features.bind(vm.display_bool_features);
-
             myJoystick.joystickMap.forEach((f,p)-> {
                 myJoystick.joystickMap.get(f).bind(vm.getDisplayVariables().get(f));
+                myJoystick.joystickMap.get(f).addListener((ob,ov,nv)->myJoystick.myJoystickController.paint());
             });
-            myJoystick.joystickMap.forEach((f,p) -> {
-                    myJoystick.joystickMap.get(f).addListener((ob,ov,nv)->myJoystick.myJoystickController.paint());
-            });
-
-
-            //binding clocks params: airspeed, altitude, heading, yaw, roll, pitch to vm
-           clocks.clocksMap.forEach((f,p) -> clocks.clocksMap.get(f).bind(vm.getDisplayVariables().get(f)));
-           clocks.clocksMap.forEach((f,p) -> clocks.clocksMap.get(f).addListener((ob,ov,nv)->clocks.setValues(f,(float)nv)));
+           clocks.clocksMap.forEach((f,p) -> {
+               clocks.clocksMap.get(f).bind(vm.getDisplayVariables().get(f));
+               clocks.clocksMap.get(f).addListener((ob,ov,nv)->clocks.setValues(f,(float)nv));
+           });
 
             pannel.controller.time_speed.bind(vm.time_speed);
-            this.vm.time.addListener((ob,ov,nv) ->
+
+            vm.time.addListener((ob,ov,nv) ->
                     pannel.controller.text_speed.setText("x" + nv.toString()));
-
-
 
             pannel.controller.time_step.bindBidirectional(vm.time_step);
             pannel.controller.time_step.addListener((ob,ov,nv) -> {
                 Platform.runLater(() -> {
                     pannel.changeTimeStep();
                 });
-                if(myLineChart.myLineChartController.selected_feature.getValue()!=null) {
-                        myLineChart.myLineChartController.add_p_paint((int) ov, (int) nv);
-                        if(((int) ov)+1==((int) nv)){
-                            myAlgoGraph.myAlgoGraphController.add_p_paint(vm.get_detect_point());
-                        }else{
-                            myAlgoGraph.myAlgoGraphController.clear_detect();
-                        }
+                if(flist.myLineChartController.selected_feature.getValue()!=null) {
+                       flist.myLineChartController.add_p_paint((int) ov, (int) nv);
+                        for(int time=(int) ov+1;time<=(int) nv;time++)
+                            myAlgoGraph.myAlgoGraphController.add_p_paint(vm.get_detect_point(time));
                 }
             });
 
+            vm.selected_feature.bind(flist.myLineChartController.selected_feature);
 
-
-            vm.selected_feature.bind(myLineChart.myLineChartController.selected_feature);
-
-            ///  a listener in case the settings file uploaded succeed
             vm.check_for_settings.addListener((o,ov,nv)->popupSettings());
             vm.settings_ok.addListener((o,ov,nv)-> popupToOpenFile());
-
 
             pannel.controller.onPlay = vm.play;
             pannel.controller.onPause = vm.pause;
@@ -121,31 +98,27 @@ public class View {
             pannel.controller.runForward = vm.forward;
             pannel.controller.runBackward = vm.backward;
             initFeature();
-
-
         }
 
     public ViewModel getVm() {
         return vm;
     }
-
 //     the function checks if the flightgear is running
 //     and send notification to the view-model to connect
     public void connectFg() {
-//        if(checkFlightGearProcess()==true){
-//            vm.connect2fg();
-//        }
-//        else{
-//            Alert alert = new Alert(Alert.AlertType.WARNING);
-//            alert.setTitle("Error");
-//            alert.setHeaderText("Please Open FlightGear App!");
-//            alert.showAndWait();
-//        }
+        if(checkFlightGearProcess()==true){
+            vm.connect2fg();
+        }
+        else{
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Error");
+            alert.setHeaderText("Please Open FlightGear App!");
+            alert.showAndWait();
+        }
     }
 
-    ///
     public void Open_csv_butten() {
-
+        pannel.controller.stop();
         Stage stage = new Stage();
         stage.setTitle("File chooser sample");
 
@@ -155,7 +128,6 @@ public class View {
         if (file != null) {
             try {
                 if (file.getPath().endsWith(".csv")) {
-                    System.out.println("File ends with csv");
                     this.fly.setDisable(false);
                     vm.set_detect_TimeSeries(file);
                 }
@@ -170,7 +142,6 @@ public class View {
         String line;
         String pidInfo ="";
         Process p = null;
-
         try {
             p = Runtime.getRuntime().exec(System.getenv("windir") +"\\system32\\"+"tasklist.exe");
             BufferedReader input =  new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -196,11 +167,8 @@ public class View {
     public void uploadSettings(){
         Stage stage = new Stage();
         stage.setTitle("File chooser sample");
-
         final FileChooser fileChooser = new FileChooser();
-
         File file = fileChooser.showOpenDialog(stage);
-
         if(file!=null){
             if (file.getPath().endsWith(".txt") || file.getPath().endsWith(".xml")){
                 System.out.println("accepting the props file");
@@ -221,7 +189,6 @@ public class View {
         alert.showAndWait();
     }
 
-
     /// the function responsible to alert the user to upload csv file after uploaded the settings file
     public void popupToOpenFile(){
         this.open.setStyle("-fx-background-color: #f5855b");
@@ -229,16 +196,14 @@ public class View {
         clocks.controller.updateMinMax(this.vm.setting_map);
     }
 
-
     public void LoadAlgo() {
-            //לבדוק אם עובד ולעשות עצור.
+        pannel.controller.pause();
         Stage stage = new Stage();
         stage.setTitle("Select Algo Class File");
         final FileChooser fileChooser = new FileChooser();
         File file = fileChooser.showOpenDialog(stage);
-        if (file != null) {
+        if (file != null&&file.getPath().contains(".java")) {
             try {
-
                 String str = file.getPath();
                 String[] path_parts = str.split("bin");
                 StringBuffer path_b = new StringBuffer();
@@ -266,20 +231,20 @@ public class View {
                         class_b.append(x);
                     }
                 }
-//                if(classname != null) {
-//                    System.out.println("View 267: clear");
-//                    Platform.runLater(() -> {
-//                        myAlgoGraph.myAlgoGraphController.set_algo_setting(vm.getpaintFunc());
-//                    });
-//                }
-                classname = class_b.toString();
+               String classname = class_b.toString();
                 URLClassLoader urlClassLoader = URLClassLoader.newInstance(new URL[]{
                         new URL(algo_path)
                 });
                 Class<?> c = urlClassLoader.loadClass(classname);
                 TimeSeriesAnomalyDetector Ts = (TimeSeriesAnomalyDetector) c.newInstance();
-                vm.setAnomalyDetector(Ts);
-
+                Platform.runLater(()->{
+                    vm.setAnomalyDetector(Ts);
+               if(flist.myLineChartController.selected_feature.get()!=null){
+                   myAlgoGraph.myAlgoGraphController.set_algo_setting(vm.getpaintFunc());
+                   for(int i=0;i<this.pannel.controller.time_step.getValue();i++)
+                        myAlgoGraph.myAlgoGraphController.add_p_paint(vm.get_detect_point(i));
+               }
+            });
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -290,30 +255,26 @@ public class View {
 
     public void initFeature() {
             List<String> features = new LinkedList<>();
-
             if(vm.display_bool_features.get()) { ;
                 for (String feature : this.vm.getTimeSeries().FeaturesList) {
                     features.add(feature);
                 }
-                myLineChart.myLineChartController.fList.getItems().addAll(features);
+                flist.myLineChartController.fList.getItems().addAll(features);
             }
-
-            myLineChart.myLineChartController.fList.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
-
+            flist.myLineChartController.fList.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
                 @Override
                 public void changed(ObservableValue<? extends String> observableValue, String s, String t1) {
-                    myLineChart.myLineChartController.selected_feature.setValue(myLineChart.myLineChartController.fList.getSelectionModel().getSelectedItem());
+                    pannel.controller.pause();
+                    flist.myLineChartController.selected_feature.setValue(flist.myLineChartController.fList.getSelectionModel().getSelectedItem());
                     vm.set_selected_vectors();
                     myAlgoGraph.myAlgoGraphController.set_algo_setting(vm.getpaintFunc());
-                    myLineChart.myLineChartController.set_setting(pannel.controller.time_step.getValue(),vm.selected_feature_vector, vm.Best_c_feature_vector);
-                    System.out.println(myLineChart.myLineChartController.fList.getSelectionModel().getSelectedItem() + " was selected");
+                    String selected = flist.myLineChartController.selected_feature.get();
+                    String b_s_name = vm.getDetect_timeSeries().getbest_c_feature(selected);
+                    flist.myLineChartController.set_setting(pannel.controller.time_step.getValue(),vm.selected_feature_vector, vm.Best_c_feature_vector,selected,b_s_name);
+                    System.out.println(flist.myLineChartController.fList.getSelectionModel().getSelectedItem() + " was selected");
                }
             });
         }
-
-
-
-
 
 }
 

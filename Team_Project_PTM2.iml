@@ -9,7 +9,7 @@
     </content>
     <orderEntry type="jdk" jdkName="16 (3)" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="lib" level="project" />
     <orderEntry type="library" name="Medusa-8.0" level="project" />
+    <orderEntry type="library" name="lib" level="project" />
   </component>
 </module>

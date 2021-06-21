@@ -1,4 +1,4 @@
-package view.linechart;
+package view.f_list;
 
 import PTM1.Helpclass.StatLib;
 import javafx.application.Platform;
@@ -11,9 +11,8 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.ListView;
 
 import java.util.Arrays;
-import java.util.List;
 
-public class MyLineChartController {
+public class F_listController {
 
 
     @FXML
@@ -34,29 +33,30 @@ public class MyLineChartController {
     public ListView<String> fList;
     public StringProperty selected_feature;
 
-    XYChart.Series series;
-    XYChart.Series series2;
+    XYChart.Series selected_F_vals;
+    XYChart.Series Best_C_F_vals;
     float[] f_vals, c_vals;
     float max_y_f, max_y_c;
 
-    public MyLineChartController() {
-        series = new XYChart.Series();
-        series2 = new XYChart.Series();
+    public F_listController() {
+        selected_F_vals = new XYChart.Series();
+        Best_C_F_vals = new XYChart.Series();
         selected_feature = new SimpleStringProperty();
     }
 
     public void add_series() {
-        FeatureLineChart.getData().add(series);
-        CorrelatedFeatureLineChart.getData().add(series2);
+        FeatureLineChart.getData().add(selected_F_vals);
+        CorrelatedFeatureLineChart.getData().add(Best_C_F_vals);
     }
 
     //need cur time val
-    public void set_setting(int curtime, float[] vals, float[] vals2) {
+    public void set_setting(int curtime, float[] vals, float[] vals2,String name_f,String name_b_f) {
         clear();
         //set selected feature linechart setting
         f_vals = vals;
         float y_f_min = StatLib.min(vals);
-        series.setName("Feature: " + selected_feature.get());
+        selected_F_vals.setName("Feature:" + name_f);
+
         x_f.setAutoRanging(false);
         x_f.setLowerBound(0);
         x_f.setUpperBound(curtime * (float) (1.1));
@@ -68,7 +68,7 @@ public class MyLineChartController {
         c_vals = vals2;
         if (c_vals != null) {
             float y_c_min = StatLib.min(vals2);
-            series2.setName("Best Correlated Feature: ");
+            Best_C_F_vals.setName("B_C Feature:"+name_b_f);
             x_c.setAutoRanging(false);
             x_c.setLowerBound(0);
             x_c.setUpperBound(curtime * (float) (1.1));
@@ -87,14 +87,14 @@ public class MyLineChartController {
                 x_c.setUpperBound(new_time * (float) (1.1));
 
                 for (int i = old_time + 1; i <= new_time; i++) {
-                    series.getData().add(new XYChart.Data(i, f_vals[i]));
+                    selected_F_vals.getData().add(new XYChart.Data(i, f_vals[i]));
                     if (f_vals[i] > max_y_f) {
                         max_y_f = f_vals[i];
                         y_f.setUpperBound(max_y_f * (float) (1.1));
                     }
 
                     if (c_vals != null) {
-                        series2.getData().add(new XYChart.Data(i, c_vals[i]));
+                        Best_C_F_vals.getData().add(new XYChart.Data(i, c_vals[i]));
                         if (c_vals[i] > max_y_c) {
                             max_y_c = c_vals[i];
                             y_c.setUpperBound(max_y_c * (float) (1.1));
@@ -104,9 +104,9 @@ public class MyLineChartController {
                 }
             } else {
                 for (int i = old_time; i != new_time; i--) {
-                    series.getData().remove(i - 1);
+                    selected_F_vals.getData().remove(i - 1);
                     if (c_vals != null)
-                        series.getData().remove(i - 1);
+                        Best_C_F_vals.getData().remove(i - 1);
                 }
                 max_y_f = StatLib.max(Arrays.copyOfRange(f_vals, 0, new_time));
                 x_f.setUpperBound(new_time * (float) (1.1));
@@ -120,7 +120,7 @@ public class MyLineChartController {
     }
 
     public void clear() {
-        series.getData().clear();
-        series2.getData().clear();
+        selected_F_vals.getData().clear();
+        Best_C_F_vals.getData().clear();
     }
 }

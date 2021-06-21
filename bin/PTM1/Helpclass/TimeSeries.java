@@ -7,15 +7,9 @@ public class TimeSeries {
 
 	private HashMap<String, float[]> hashMap;
 	private int vector_size;
-
-
 	public String[] FeaturesList;
-	public int getVector_size() {
-		return vector_size;
-	}
 
 	public TimeSeries(String csvFileName) {
-
 
 		int i=0;
 		boolean eflag=false;
@@ -88,7 +82,7 @@ public class TimeSeries {
 		}
 	}
 
-	public HashMap<String,float []> getHashMap() {return this.hashMap;} //returns pointer to csv
+	public HashMap<String,float[]> getHashMap() {return hashMap;} //returns pointer to csv
 
 	public String[] getFeaturesList() {
 		return FeaturesList;
@@ -141,10 +135,10 @@ public class TimeSeries {
 	public float valueAtIndex(int timeStep, String feature_key) {
 		return this.hashMap.get(feature_key)[timeStep];
 	}
+
 	public float valueAtIndex(int timeStep, int feature_index) {
 		return valueAtIndex(timeStep,getFeaturesList()[feature_index]);
 	}
-
 
 	public void setvalue(String name,int val,int val2){
 		float[] newstr =this.hashMap.get(name);

@@ -14,14 +14,21 @@ import java.util.List;
 
 public class SimpleAnomalyDetector implements TimeSeriesAnomalyDetector {
 
-	HashMap<String,LineCorrelatedFeatures> correlatedFeaturesList = new HashMap<>();
-	HashMap<String,String> best_corlation_couples = new HashMap<>();
+	HashMap<String, LineCorrelatedFeatures> correlatedFeaturesList;
+	HashMap<String, String> best_corlation_couples;
+	public HashMap<String, List<AnomalyReport>> anomalyReportList;
+
+	public SimpleAnomalyDetector() {
+	correlatedFeaturesList = new HashMap<>();
+	best_corlation_couples = new HashMap<>();
+	anomalyReportList = new HashMap<>();
+	}
+
 	@Override
 	public void learnNormal(TimeSeries ts) {
 		float best_correlated=0;
 		float threshold = (float) 0.9;
 		String [] features = ts.getFeaturesList();
-
 		for (int i=0;i<ts.getHashMap().size()-1;i++) { //for every feature checking cov with the other features
 			String feature_check = features[i];
 			String through_feature = ts.getbest_c_feature(feature_check);
@@ -48,25 +55,19 @@ public class SimpleAnomalyDetector implements TimeSeriesAnomalyDetector {
 	}
 	@Override
 	public HashMap<String,List<AnomalyReport>> detect(TimeSeries ts) {
-		HashMap<String,List<AnomalyReport>> anomalyReportList = new HashMap<>();
-		String[] features = ts.getFeaturesList();
-		LineCorrelatedFeatures correlatedFeatures;
-		for (int j=0;j<features.length;j++) {
-			if (this.correlatedFeaturesList.containsKey(features[j])) {
-				correlatedFeatures = this.correlatedFeaturesList.get(features[j]);
+		Point p;
+		for (LineCorrelatedFeatures correlatedFeatures:correlatedFeaturesList.values()) {
 				for (int i = 0; i < ts.getSizeOfVector(); i++) {
-					Point p = new Point(ts.valueAtIndex(i, correlatedFeatures.feature1), ts.valueAtIndex(i, correlatedFeatures.feature2));
+					p = new Point(ts.valueAtIndex(i, correlatedFeatures.feature1), ts.valueAtIndex(i, correlatedFeatures.feature2));
 					if (StatLib.dev(p, correlatedFeatures.lin_reg) > correlatedFeatures.max_div) {
-						if (anomalyReportList.containsKey(correlatedFeatures.feature1) == false) {
+						if (!anomalyReportList.containsKey(correlatedFeatures.feature1))
 							anomalyReportList.put(correlatedFeatures.feature1, new LinkedList<>());
-						}
-						anomalyReportList.get(correlatedFeatures.feature1).add(new AnomalyReport(correlatedFeatures.feature1 + "-"
-								+ correlatedFeatures.feature2, correlatedFeatures.feature2, (long) i + 1));
+
+						anomalyReportList.get(correlatedFeatures.feature1).add(new AnomalyReport("anomaly at "+correlatedFeatures.feature1 + "-with-"
+								+ correlatedFeatures.feature2+"in time"+(i + 1), correlatedFeatures.feature2, (long) i + 1));
 					}
 				}
 			}
-		}
-
 		return anomalyReportList;
 
 
@@ -104,8 +105,6 @@ public class SimpleAnomalyDetector implements TimeSeriesAnomalyDetector {
 		XYChart.Series learning_points = new XYChart.Series();
 		XYChart.Series algo_points = new XYChart.Series();
 		XYChart.Series setting_algo = new XYChart.Series();
-
-
 		float min,max;
 		float[] selected_f_vals = ts.getHashMap().get(feature);
 		if(best_corlation_couples.containsKey(feature) ) {
@@ -120,35 +119,28 @@ public class SimpleAnomalyDetector implements TimeSeriesAnomalyDetector {
 			algo_points.getData().add(new XYChart.Data(max, line.a * max + line.b));
 			setting_algo.getData().add(new XYChart.Data(min, max));
 			setting_algo.getData().add(new XYChart.Data(line.a * min + line.b, line.a * max + line.b));
+			setting_algo.getData().add(new XYChart.Data(0, 30));
 			learning_points.setName("Lerning Points");
 			algo_points.setName("Line-Reg-Algo");
 			setting_algo.setName("setting-Algo");
-			points.add(learning_points);
-			points.add(algo_points);
-			points.add(setting_algo);
-			return points;
-		}
-		return null;
+		}else
+			return null;
+		points.add(learning_points);
+		points.add(algo_points);
+		points.add(setting_algo);
+		return points;
 	}
 
-	public List<XYChart.Series> detect_P(TimeSeries ts,String feature,int time_step){
-		List<XYChart.Series> detect_points = new LinkedList<>();
-		XYChart.Series series= new XYChart.Series();
-		XYChart.Series series1= new XYChart.Series();
+	public float[] detect_P(TimeSeries ts,String feature,int time_step){
+		LineCorrelatedFeatures correlatedFeature= correlatedFeaturesList.get(feature);
+		if(correlatedFeature!=null){
 		float x = ts.valueAtIndex(time_step,feature);
 		float y = ts.valueAtIndex(time_step,best_corlation_couples.get(feature));
-
-		LineCorrelatedFeatures correlatedFeature= this.correlatedFeaturesList.get(feature);
-		if(correlatedFeature!=null) {
-			if (StatLib.dev(new Point(x,y), correlatedFeature.lin_reg) > correlatedFeature.max_div) {
-				series1.getData().add(new XYChart.Data(x,y));
-			}
-		}else{
-			series.getData().add(new XYChart.Data(x,y));
+			if (StatLib.dev(new Point(x,y), correlatedFeature.lin_reg) > correlatedFeature.max_div)
+				return new float[]{x, y, (float) 1};
+			 else
+				return new float[]{x, y, (float) 2};
 		}
-
-		detect_points.add(series);
-		detect_points.add(series1);
-		return detect_points;
+		return null;
 	}
 }

@@ -119,4 +119,14 @@ public class StatLib {
 		curZscore = Math.abs(num - curAvg) / curStiya;
 		return curZscore;
 	}
+	public static float checkZScore(float num, float[] curColToCheck) {
+		float curAvg = 0, curStiya = 0, curZscore = 0;
+		curStiya = (float) Math.sqrt(var(curColToCheck));
+		if (curStiya == 0) {
+			return 0;
+		}
+		curAvg = avg(curColToCheck);
+		curZscore = Math.abs(num - curAvg) / curStiya;
+		return curZscore;
+	}
 }

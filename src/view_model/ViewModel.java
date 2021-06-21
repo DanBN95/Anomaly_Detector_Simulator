@@ -32,31 +32,21 @@ import java.util.concurrent.*;
 public class ViewModel implements Observer {
 
     Model model;
-    TimeSeries timeSeries,detect_timeSeries;
-    TimeSeriesAnomalyDetector anomalyDetector;
-
-    public File file;
 
     public final Runnable play,pause,stop,forward,backward;
-    private ScheduledFuture<?> futureTask;
-    public double x;
-
 
     public IntegerProperty time_step;
     public LongProperty time_speed;
     public DoubleProperty time;
 
-
     private HashMap<String,SimpleFloatProperty> displayVariables;
-    public FloatProperty aileron,elevator,rudder,throttle,altitude,airSpeed,heading;
     public StringProperty selected_feature;
-    public BooleanProperty check_settings;
-    private ScheduledExecutorService scheduledExecutorService;
+
+    private ExecutorService scheduledExecutorService;
 
     public float[] selected_feature_vector;
     public float[] Best_c_feature_vector;
-    public List<AnomalyReport> AnomalyReport;
-    /// for the popup alert in case the settings file of the user is not good
+
     public BooleanProperty check_for_settings = new SimpleBooleanProperty(true);
     public BooleanProperty settings_ok = new SimpleBooleanProperty(false);
     public BooleanProperty display_bool_features;
@@ -65,78 +55,69 @@ public class ViewModel implements Observer {
 
 
     public ViewModel(Model m) {
-        this.model = m;
-        this.model.addObserver(this);
-        scheduledExecutorService = Executors.newScheduledThreadPool(5);
+        model = m;
+        model.addObserver(this);
 
-        check_settings=new SimpleBooleanProperty(false);
-        display_bool_features = new SimpleBooleanProperty(false);
-        check_settings.setValue(true);
+        scheduledExecutorService = Executors.newSingleThreadExecutor();
+
         selected_feature = new SimpleStringProperty();
+        display_bool_features = new SimpleBooleanProperty(false);
         time = new SimpleDoubleProperty();
-
         time_step = new SimpleIntegerProperty(0);
         time_speed = new SimpleLongProperty((long)model.time_default);
-        this.time.setValue(1);
-        model.timestep = this.time_step;
-        model.time_speed = this.time_speed;
-        x = 1;
+        time.setValue(1);
+        model.timestep =time_step;
+        model.time_speed =time_speed;
         model.setSettings(model.settings);
-        displayVariables = new HashMap<>();
         displayVariables = this.model.showFields();
-
-
-        Best_c_feature_vector=null;
         time_step.addListener((o, ov, nv) -> {
             Platform.runLater(() -> setTimeStep((int) nv));
         });
 
-        play = ()-> model.play();
-        stop = ()-> model.stop();
-        pause = ()-> model.pause();
-        forward = ()-> this.changeTimeSpeed(0.25);
-        backward = ()-> this.changeTimeSpeed(-0.25);
+        play = () -> scheduledExecutorService.execute(()->model.play());
+        stop = ()-> scheduledExecutorService.execute(()->model.stop());
+        pause = ()-> scheduledExecutorService.execute(()->model.pause());
+        forward = ()-> scheduledExecutorService.execute(()->this.changeTimeSpeed(0.25));
+        backward = ()-> scheduledExecutorService.execute(()->this.changeTimeSpeed(-0.25));
 
     }
 
+    @Override
+    public void update(Observable o, Object arg) {
+          this.display_bool_features.setValue(true);
+   }
 
     synchronized public void changeTimeSpeed(double time) {
         if(time > 0) {
             if (this.time.get() >= 0.25 && this.time.get() < 2) {
-                System.out.println("change time speed ");
                 this.time.setValue(this.time.get() + time);
-                model.pause();
                 time_speed.set((long) (200 / this.time.get()));
-                model.play();
             }
         }
         else if(time < 0) {
             if (this.time.get() > 0.25 && this.time.get() <= 2) {
-                System.out.println("change time speed ");
                 this.time.setValue(this.time.get() + time);
-                model.pause();
                 time_speed.set((long) (100 / this.time.get()));
-                model.play();
             }
+            model.pause();
+            model.play();
 
             }
     }
 
     public void connect2fg(){
-        model.csvToFg(this.timeSeries);
+        model.csvToFg();
     }
 
     public void set_detect_TimeSeries(File f) {
-        detect_timeSeries = new TimeSeries(f.getPath());
-        model.set_detect_TimeSeries(detect_timeSeries);
+        model.set_detect_TimeSeries(f);
     }
-
 
     public void setTimeStep(int time_step) {
         this.model.timestep.set(time_step);
-        if(timeSeries !=null){
+        if(model.timeSeries !=null){
             for (String feature : this.displayVariables.keySet()) {
-                displayVariables.get(feature).setValue(timeSeries.valueAtIndex(time_step,this.model.setting_map.get(feature).get(0)));
+                displayVariables.get(feature).setValue(model.timeSeries.valueAtIndex(time_step,this.model.setting_map.get(feature).get(0)));
             }
         }
     }
@@ -145,35 +126,26 @@ public class ViewModel implements Observer {
         return displayVariables;
     }
 
-    @Override
-    public void update(Observable o, Object arg) {
-        timeSeries = model.getTimeSeries();
-        System.out.println("Time series learn successed");
-        display_bool_features.set(true);
+    public TimeSeries getTimeSeries(){
+        return model.timeSeries;
     }
 
-    public TimeSeriesAnomalyDetector getAnomalyDetector() {
-        return anomalyDetector;
+    public TimeSeries getDetect_timeSeries(){
+        return model.detect_timeSeries;
     }
 
     public void setAnomalyDetector(TimeSeriesAnomalyDetector anomalyDetector) {
         this.model.setAnomalyDetevtor(anomalyDetector);
     }
 
-
-    ///  the function send the settings file to the model for checking validation and setting the properties
     public void sendSettingsToModel(File f){
         if(this.model.CheckSettings(f)){
-            System.out.println("the settings check succeeded");
-            this.model.setSettings(f.getPath());
-            this.setting_map=this.model.setting_map;
+            model.setSettings(f.getPath());
+            setting_map=model.setting_map;
             settings_ok.set(!settings_ok.get());
         }
         else{
-            System.out.println("the settings check failed");
-            System.out.println(check_for_settings);
             check_for_settings.set(!check_for_settings.get());
-            System.out.println(check_for_settings);
         }
     }
     public void set_selected_vectors(){
@@ -182,28 +154,10 @@ public class ViewModel implements Observer {
     }
 
     public List<XYChart.Series> getpaintFunc(){
-        AnomalyReport= model.getAnomalyReports(selected_feature.getValue());
         return model.paintAlgo(selected_feature.getValue());
     }
 
-    public float[] get_detect_point(){
-        int cur_timestep =time_step.getValue();
-        float x_val = selected_feature_vector[cur_timestep];
-        if(Best_c_feature_vector==null){return null;}
-        float y_val = Best_c_feature_vector[cur_timestep];
-        if(AnomalyReport!=null){
-          for(int i=0;i<AnomalyReport.size();i++){
-                if(AnomalyReport.get(i).timeStep==cur_timestep){
-                    float[] detect_point= {x_val,y_val, (float) 1};
-                 return detect_point;
-                 }
-          }
-        }
-        float[] detect_point= {x_val,y_val,(float)2};
-        return detect_point;
-    }
-
-    public TimeSeries getTimeSeries() {
-        return timeSeries;
+    public float[] get_detect_point(int time){
+       return model.anomalyDetector.detect_P(model.detect_timeSeries,selected_feature.getValue(),time);
     }
 }

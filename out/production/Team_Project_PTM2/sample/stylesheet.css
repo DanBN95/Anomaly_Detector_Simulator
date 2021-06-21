@@ -19,8 +19,6 @@
 
 }
 
-
-
 .slider .thumb{
     -fx-background-color: #292929;
     -fx-font-size: 20;
@@ -52,9 +50,6 @@
     -fx-text-fill: #ffffff;
     -fx-font-weight: bold;
     -fx-cursor: hand;
-
-
-
 }
 
 #myancor{
@@ -188,13 +183,4 @@
 
 .chart-legend-item{
     -fx-text-fill: #5AA983;
-}
-
-.default-color0.chart-series-line {
-    -fx-stroke: linear-gradient(from 25% 25% to 100% 100%, #dc143c, #f1e509);
-}
-
-
-.default-color0.chart-line-symbol {
-    -fx-background-color: #e9bb5b, #db6537;
 }

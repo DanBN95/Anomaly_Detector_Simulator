@@ -1,12 +1,9 @@
 package view.algoGraph;
 
 import javafx.fxml.FXMLLoader;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
-import view.linechart.MyLineChartController;
 
 import java.io.IOException;
-import java.util.Collection;
 
 public class MyAlgoGraph extends Pane {
     public MyAlgoGraphController myAlgoGraphController;

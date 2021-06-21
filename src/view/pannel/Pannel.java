@@ -21,7 +21,6 @@ public class Pannel extends AnchorPane {
         }
         if(ap!=null){
             controller = fxl.getController();
-            System.out.println("pannel line 24");
             this.getChildren().add(ap);
         }
         else

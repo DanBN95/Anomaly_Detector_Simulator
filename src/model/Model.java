@@ -19,38 +19,32 @@ import java.util.concurrent.TimeUnit;
 
 public class Model extends Observable  {
 
-    TimeSeries timeSeries,detect_timeSeries;
-    TimeSeriesAnomalyDetector anomalyDetector;
+    public TimeSeries timeSeries,detect_timeSeries;
+    public TimeSeriesAnomalyDetector anomalyDetector;
+
     PrintWriter out2fg;
     Socket fg;
+
     public HashMap<String, ArrayList<Integer>> setting_map;
     public HashMap<String,List<AnomalyReport>> AnomalyReports;
+
     int port;
     String ip;
     public String settings;
     Timer t = null;
+
     public IntegerProperty timestep;
     public volatile LongProperty time_speed;
     public float time_default;
 
     public Model(String settings) {
-
         this.settings = settings;
-
     }
 
-    public void csvToFg(TimeSeries ts) {
-    /*
-    suppose to take the timeseries, connecting to fg,
-    read line by line from the csv file in the ts values separated by comma(','),
-    and for every value the fg put it in the right placee
-    thank to the playback_small file
-     */
-            System.out.println("csvToFg");
+    public void csvToFg() {
         try {
             fg = new Socket(ip,port);
             out2fg = new PrintWriter(fg.getOutputStream());
-
         } catch (UnknownHostException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -59,15 +53,12 @@ public class Model extends Observable  {
     }
 
     public void setSettings(String settings) {
-
         time_default = 200;
         setting_map = new HashMap<>();
-
         if (settings.contains(".txt"))
             loadSettingsFromTxt(settings);
         else if(settings.contains(".xml")) {
             serializeToXML(settings);
-            System.out.println("serialize success! (Model,line 66)");
             desrializeFromXML(settings);
         }
 
@@ -79,7 +70,6 @@ public class Model extends Observable  {
         try {
             myScanner = new Scanner(new BufferedReader(new FileReader(settings)));
             while (myScanner.hasNextLine()) {
-
                 String line = myScanner.nextLine();
                 String[] vec_by_row = line.split(",");
                 if (vec_by_row[0].equals("ip")) {
@@ -99,7 +89,6 @@ public class Model extends Observable  {
                     timeSeries = new TimeSeries(vec_by_row[1]);
                     setChanged();
                     notifyObservers();
-                    System.out.println("notify");
                     continue;
                 }
                 setting_map.put(vec_by_row[0], new ArrayList<>());
@@ -112,6 +101,7 @@ public class Model extends Observable  {
                     setting_map.get(vec_by_row[0]).add(Integer.parseInt(s));
                 }
             }
+
             myScanner.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -216,8 +206,9 @@ public class Model extends Observable  {
         this.anomalyDetector=ad;
         if(this.timeSeries!=null){
             this.anomalyDetector.learnNormal(this.timeSeries);
-            System.out.println("Finish learning");
-
+        }
+        if(this.detect_timeSeries!=null){
+            this.anomalyDetector.detect(detect_timeSeries);
         }
     }
 
@@ -307,19 +298,16 @@ public class Model extends Observable  {
         return ip.matches(PATTERN);
     }
 
-    // Projection Functions:
     public void setTimeSeries(TimeSeries ts) {
         this.timeSeries = ts;
         if(anomalyDetector!=null){
             anomalyDetector.learnNormal(this.timeSeries);
-            System.out.println("Finish learning");
         }
     }
-    public void set_detect_TimeSeries(TimeSeries ts) {
-        detect_timeSeries = ts;
+    public void set_detect_TimeSeries(File f) {
+        detect_timeSeries = new TimeSeries(f.getPath());
         if(anomalyDetector!=null){
             AnomalyReports=anomalyDetector.detect(detect_timeSeries);
-            System.out.println("finish detect");
         }
     }
 
@@ -329,9 +317,9 @@ public class Model extends Observable  {
             t.scheduleAtFixedRate(new TimerTask() {
                 @Override
                 public void run() {
-                    System.out.println("sending row "+ timestep.get() + " with time speed: " + time_speed.get());
+                   // System.out.println("sending row "+ timestep.get() + " with time speed: " + time_speed.get());
                     String row_data = timeSeries.row_array(timestep.get());
-                    //out2fg.println(row_data);
+                    out2fg.println(row_data);
                     timestep.set(timestep.get()+1);
 
                 }
@@ -369,38 +357,25 @@ public class Model extends Observable  {
 
     public float[] getSelected_vector(String selected_feature){
         String feature_name = setting_map.containsKey(selected_feature) ? timeSeries.getFeaturesList()[setting_map.get(selected_feature).get(0)] : selected_feature;
-        float[] selected_feature_vals =timeSeries.getHashMap().get(feature_name);
+        float[] selected_feature_vals = timeSeries.getHashMap().get(feature_name);
         return selected_feature_vals;
     }
 
     public float[] getBest_cor_Selected_vector(String selected_feature){
         String best_c_feature = setting_map.containsKey(selected_feature)? timeSeries.getbest_c_feature(setting_map.get(selected_feature).get(0)) : timeSeries.getbest_c_feature(selected_feature);
         float[] selected_feature_vals=null;
-        if(best_c_feature!=null)
+        if(!best_c_feature.equals(""))
              selected_feature_vals = timeSeries.getHashMap().get(best_c_feature);
         return selected_feature_vals;
     }
 
-
     public List<XYChart.Series> paintAlgo(String selected_featureX){
-
         String slected_feature_N = setting_map.containsKey(selected_featureX)? timeSeries.getFeaturesList()[setting_map.get(selected_featureX).get(0)]:selected_featureX;
         return anomalyDetector.paint(timeSeries,slected_feature_N);
     }
-//    public List<XYChart.Series> paintdtect(String selected_featureX){
-//        String slected_feature_N = timeSeries.getFeaturesList()[setting_map.get(selected_featureX).get(0)];
-//        return anomalyDetector.detect(timeSeries, slected_feature_N);
-//    }
 
-    public List<AnomalyReport> getAnomalyReports(String selected_feature){
-        return AnomalyReports.get(selected_feature);
-    }
 
     public TimeSeries getTimeSeries() {
         return timeSeries;
-    }
-
-    public TimeSeries getDetect_timeSeries() {
-        return detect_timeSeries;
     }
 }
