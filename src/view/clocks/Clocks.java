@@ -1,5 +1,6 @@
 package view.clocks;
 
+import javafx.application.Platform;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.fxml.FXMLLoader;
@@ -35,7 +36,9 @@ public class Clocks extends AnchorPane {
         }
     }
     public void setValues(String featureName, float newVal) {
+        Platform.runLater(()->{
         controller.gaugeMap.get(featureName).setValue((double)newVal);
+        });
     }
     private void setClocksMap() {
 

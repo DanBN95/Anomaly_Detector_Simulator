@@ -37,7 +37,7 @@
     -fx-background-color: transparent;
     -fx-background-insets: 0 ;
     -fx-alignment: center;
-    -fx-font-size:20;
+    -fx-font-size:10;
     -fx-padding: 0;
     -fx-background-color: #484445;
     -fx-font-family: berlin sans sans-serif;
@@ -57,7 +57,7 @@
 }
 
 .button {
-    -fx-font-size: 13;
+    -fx-font-size: 11;
     -fx-content-display: bottom;
     -fx-text-fill: black;
     -fx-font-family: Tahoma;
@@ -72,31 +72,31 @@
 }
 
 #play{
-    -fx-background-image: url(Assets/play.png);
+    -fx-background-image: url(pic/play.png);
     -fx-background-size: 25px;
     -fx-background-repeat: no-repeat;
     -fx-background-position: 100%;
 }
 #pause{
-    -fx-background-image: url(Assets/pause.png);
+    -fx-background-image: url(pic/pause.png);
     -fx-background-size: 25px;
     -fx-background-repeat: no-repeat;
     -fx-background-position: 90%;
 }
 #forward{
-    -fx-background-image: url(Assets/forward.png);
+    -fx-background-image: url(pic/forward.png);
     -fx-background-size: 25px;
     -fx-background-repeat: no-repeat;
     -fx-background-position: 90%;
 }
 #backward{
-    -fx-background-image: url(Assets/backward.png);
+    -fx-background-image: url(pic/backward.png);
     -fx-background-size: 25px;
     -fx-background-repeat: no-repeat;
     -fx-background-position: 90%;
 }
 #stop{
-    -fx-background-image: url(Assets/stop.png);
+    -fx-background-image: url(pic/stop.png);
     -fx-background-size: 27px;
     -fx-background-repeat: no-repeat;
     -fx-background-position: 90%;
@@ -183,4 +183,7 @@
 
 .chart-legend-item{
     -fx-text-fill: #5AA983;
+}
+#open{
+    -fx-background-color: #e5d1de;
 }

@@ -1,6 +1,6 @@
 package view.f_list;
 
-import PTM1.Helpclass.StatLib;
+import model.algorithms.Helpclass.StatLib;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -31,7 +31,7 @@ public class F_listController {
     private LineChart CorrelatedFeatureLineChart;
     @FXML
     public ListView<String> fList;
-    public StringProperty selected_feature;
+    public StringProperty selected_feature,B_S_feature;
 
     XYChart.Series selected_F_vals;
     XYChart.Series Best_C_F_vals;
@@ -42,6 +42,8 @@ public class F_listController {
         selected_F_vals = new XYChart.Series();
         Best_C_F_vals = new XYChart.Series();
         selected_feature = new SimpleStringProperty();
+        B_S_feature=new SimpleStringProperty();
+
     }
 
     public void add_series() {
@@ -50,12 +52,12 @@ public class F_listController {
     }
 
     //need cur time val
-    public void set_setting(int curtime, float[] vals, float[] vals2,String name_f,String name_b_f) {
+    public void set_setting(int curtime, float[] vals, float[] vals2) {
         clear();
         //set selected feature linechart setting
         f_vals = vals;
         float y_f_min = StatLib.min(vals);
-        selected_F_vals.setName("Feature:" + name_f);
+        selected_F_vals.setName("Feature:" + selected_feature.get());
 
         x_f.setAutoRanging(false);
         x_f.setLowerBound(0);
@@ -68,7 +70,7 @@ public class F_listController {
         c_vals = vals2;
         if (c_vals != null) {
             float y_c_min = StatLib.min(vals2);
-            Best_C_F_vals.setName("B_C Feature:"+name_b_f);
+            Best_C_F_vals.setName("B_C Feature:"+B_S_feature.get());
             x_c.setAutoRanging(false);
             x_c.setLowerBound(0);
             x_c.setUpperBound(curtime * (float) (1.1));

@@ -1,12 +1,10 @@
 package model;
 
-import PTM1.AnomalyDetector.AnomalyReport;
-import PTM1.AnomalyDetector.TimeSeriesAnomalyDetector;
+import model.algorithms.AnomalyDetector.AnomalyReport;
+import model.algorithms.AnomalyDetector.TimeSeriesAnomalyDetector;
 import javafx.beans.property.*;
 import javafx.scene.chart.XYChart;
-import sample.Properties;
-import sample.UserSettings;
-import PTM1.Helpclass.TimeSeries;
+import model.algorithms.Helpclass.TimeSeries;
 
 import java.beans.ExceptionListener;
 import java.beans.XMLDecoder;
@@ -15,7 +13,6 @@ import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 public class Model extends Observable  {
 
@@ -44,7 +41,7 @@ public class Model extends Observable  {
     public void csvToFg() {
         try {
             fg = new Socket(ip,port);
-            out2fg = new PrintWriter(fg.getOutputStream());
+          //  out2fg = new PrintWriter(fg.getOutputStream());
         } catch (UnknownHostException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -86,7 +83,7 @@ public class Model extends Observable  {
                     continue;
                 }
                 else if (vec_by_row[0].equals("flight path")) {
-                    timeSeries = new TimeSeries(vec_by_row[1]);
+                    setTimeSeries(new TimeSeries(vec_by_row[1]));
                     setChanged();
                     notifyObservers();
                     continue;
@@ -245,6 +242,12 @@ public class Model extends Observable  {
                         break;
                     }
                 }
+                else if(line_in_array[0].equals("flight path")){
+                    if(!line_in_array[1].endsWith("csv")){
+                        System.out.println("the flight path is not good");
+                        answer=false;
+                        continue;}
+                }
                 //*********************************************
                 // Add else if for rum speed validation
 
@@ -298,12 +301,129 @@ public class Model extends Observable  {
         return ip.matches(PATTERN);
     }
 
+    public boolean checkCSVfile(File f){
+        boolean answer =true;
+        Scanner scanner = null;
+        // Index in the csv file
+        int aileron = this.setting_map.get("aileron").get(0);
+        int elevator = this.setting_map.get("elevator").get(0);
+        int rudder = this.setting_map.get("rudder").get(0);
+        int throttle = this.setting_map.get("throttle").get(0);
+        int altitude = this.setting_map.get("altitude").get(0);
+        int airSpeed = this.setting_map.get("airSpeed").get(0);
+        int heading = this.setting_map.get("heading").get(0);
+        int roll = this.setting_map.get("roll").get(0);
+        int pitch = this.setting_map.get("pitch").get(0);
+        int yaw = this.setting_map.get("yaw").get(0);
+
+        try {
+            scanner = new Scanner(new BufferedReader(new FileReader(f.getPath())));
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                String[] line_in_array = line.split(",");
+                if(!isNumeric(line_in_array[0]))
+                    continue;
+                for(int i=0; i<line_in_array.length;i++){
+                    if(line_in_array[i]==null){
+                        System.out.println("the error is null field");
+                        return false;
+                    }
+                    float value = Float.parseFloat(line_in_array[i]);
+                    if(i==aileron){
+                        answer=checkInRange(value,"aileron");
+                        if(!answer){
+                            System.out.println("the error is aileron");
+                            break;
+                        }
+                    }
+                    if(i==elevator){
+                        answer=checkInRange(value,"elevator");
+                        if(!answer){
+                            System.out.println("the error is elevator");
+                            break;
+                        }
+                    }
+                    if(i==rudder){
+                        answer=checkInRange(value,"rudder");
+                        if(!answer){
+                            System.out.println("the error is aileron");
+                            break;
+                        }
+                    }
+                    if(i==throttle){
+                        answer=checkInRange(value,"throttle");
+                        if(!answer){
+                            System.out.println("the error is throttle");
+                            break;
+                        }
+                    }
+                    if(i==altitude){
+                        answer=checkInRange(value,"altitude");
+                        if(!answer){
+                            System.out.println("the error is altitude");
+                            break;
+                        }
+                    }
+                    if(i==airSpeed){
+                        answer=checkInRange(value,"airSpeed");
+                        if(!answer){
+                            System.out.println("the error is airspeed");
+                            break;
+                        }
+                    }
+                    if(i==heading){
+                        answer=checkInRange(value,"heading");
+                        if(!answer){
+                            System.out.println("the error is heading");
+                            break;
+                        }
+                    }
+                    if(i==roll){
+                        answer=checkInRange(value,"roll");
+                        if(!answer){
+                            System.out.println("the error is roll");
+                            break;
+                        }
+                    }
+                    if(i==pitch){
+                        answer=checkInRange(value,"pitch");
+                        if(!answer){
+                            System.out.println("the error is pitch");
+                            break;
+                        }
+                    }
+                    if(i==yaw){
+                        answer=checkInRange(value,"yaw");
+                        if(!answer){
+                            System.out.println("the error is yaw");
+                            break;
+                        }
+                    }
+                }
+            }
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        return answer;
+    }
+
+    //changes
+    public boolean checkInRange(float value, String feature){
+        boolean answer = true;
+        if(value<setting_map.get(feature).get(2) || value>setting_map.get(feature).get(1)){
+            answer=false;
+        }
+        return answer;
+    }
+
     public void setTimeSeries(TimeSeries ts) {
         this.timeSeries = ts;
         if(anomalyDetector!=null){
             anomalyDetector.learnNormal(this.timeSeries);
         }
     }
+
     public void set_detect_TimeSeries(File f) {
         detect_timeSeries = new TimeSeries(f.getPath());
         if(anomalyDetector!=null){
@@ -319,7 +439,8 @@ public class Model extends Observable  {
                 public void run() {
                    // System.out.println("sending row "+ timestep.get() + " with time speed: " + time_speed.get());
                     String row_data = timeSeries.row_array(timestep.get());
-                    out2fg.println(row_data);
+                    //out2fg.println(row_data);
+                    //out2fg.flush();
                     timestep.set(timestep.get()+1);
 
                 }
@@ -373,7 +494,6 @@ public class Model extends Observable  {
         String slected_feature_N = setting_map.containsKey(selected_featureX)? timeSeries.getFeaturesList()[setting_map.get(selected_featureX).get(0)]:selected_featureX;
         return anomalyDetector.paint(timeSeries,slected_feature_N);
     }
-
 
     public TimeSeries getTimeSeries() {
         return timeSeries;

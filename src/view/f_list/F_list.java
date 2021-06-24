@@ -11,7 +11,7 @@ public class F_list extends Pane {
         try {
             FXMLLoader fxl = new FXMLLoader();
             Pane ap = fxl.load(getClass().getResource("F_list.fxml").openStream());
-            //ap.getStylesheets().add(getClass().getResource("F_listStyle.css").toExternalForm());
+            ap.getStylesheets().add(getClass().getResource("F_listStyle.css").toExternalForm());
 
             myLineChartController=fxl.getController();
             myLineChartController.add_series();

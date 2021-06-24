@@ -59,9 +59,11 @@ public class PannelController {
     }
 
     public void changeTimeStep(MouseEvent mouseEvent) {
+        pause();
         System.out.println("time step has changed by dragging slider");
         this.time_step.set((int) slider.getValue());
         System.out.println(this.time_step);
+        play();
     }
 
 }
