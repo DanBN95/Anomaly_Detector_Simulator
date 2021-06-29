@@ -6,7 +6,6 @@ import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
-import model.algorithms.Helpclass.Line;
 
 import java.util.ArrayDeque;
 import java.util.List;
@@ -45,10 +44,10 @@ public class MyAlgoGraphController {
     public void set_algo_setting(List<XYChart.Series> data) {
         Algo_line_chart.setCreateSymbols(true);
         if (data == null) {
-            Algo_line_chart.setTitle("No-Algo");
+         //   Algo_line_chart.setTitle("No-Algo");
         }else {
                Platform.runLater(()->{
-                   Algo_line_chart.setTitle(data.get(1).getName());
+                   //Algo_line_chart.setTitle(data.get(1).getName());
             Algo_line_chart.getData().add(data.get(1));
             Algo_line_chart.getData().add(data.get(0));
             Algo_line_chart.getData().add(good_points);
@@ -82,17 +81,13 @@ public class MyAlgoGraphController {
         if(count==0){
             count--;
             step =queue.poll();
-            if(step==1) {
+            if(step==1)
                 v_points.getData().remove(0);
-                System.out.println("by");
-            }else {
+            else
                 good_points.getData().remove(0);
-                System.out.println("by bed");
-            }
         }
         if (point[2] == 1) {
             v_points.getData().add(new XYChart.Data(point[0], point[1]));
-            System.out.println("add 1 ");
         }else
             good_points.getData().add(new XYChart.Data(point[0], point[1]));
 

@@ -1,5 +1,6 @@
 package view.pannel;
 
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
@@ -31,7 +32,6 @@ public class Pannel extends AnchorPane {
         controller.slider.setValue(controller.time_step.get());
         int minutes = controller.time_step.get() / 60;
         int seconds =(int) (controller.time_step.get() - (minutes * 60));
-        controller.runtimeDisplay.setText(minutes+":"+seconds);
-
+        Platform.runLater(()->controller.runtimeDisplay.setText(minutes+":"+seconds));
     }
 }

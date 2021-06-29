@@ -2,7 +2,7 @@ package view;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import model.algorithms.AnomalyDetector.TimeSeriesAnomalyDetector;
+import model.Helpclass.TimeSeriesAnomalyDetector;
 import javafx.beans.property.*;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -103,7 +103,7 @@ public class View {
 //     and send notification to the view-model to connect
       public void connectFg() {
         if(checkFlightGearProcess()==true){
-            //vm.connect2fg();
+            vm.connect2fg();
         }
         else{
             Alert alert = new Alert(Alert.AlertType.WARNING);
@@ -215,7 +215,7 @@ public class View {
         if (file != null && file.getPath().contains(".java")) {
             try {
                 String str = file.getPath();
-                String[] path_parts = str.split("src");
+                String[] path_parts = str.split("algorithms");
                 StringBuffer path_b = new StringBuffer();
                 StringBuffer class_b = new StringBuffer();
                 path_b.append("file://");
@@ -226,10 +226,10 @@ public class View {
                         path_b.append(x);
                     }
                 }
-                path_b.append("bin/");
+//                path_b.append("algorithms/");
                 String algo_path = path_b.toString();
                 String[] name1 = path_parts[1].split(".java");
-//                String[] name1 = path_parts[1].split(".java");
+                class_b.append("algorithms.");
                 Boolean check = false;
                 for (char x : name1[0].toCharArray()) {
                     if (x == '\\') {

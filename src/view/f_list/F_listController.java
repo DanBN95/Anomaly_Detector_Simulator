@@ -1,6 +1,6 @@
 package view.f_list;
 
-import model.algorithms.Helpclass.StatLib;
+import model.Helpclass.StatLib;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;

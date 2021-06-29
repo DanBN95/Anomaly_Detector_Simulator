@@ -1,10 +1,10 @@
 package model;
 
-import model.algorithms.AnomalyDetector.AnomalyReport;
-import model.algorithms.AnomalyDetector.TimeSeriesAnomalyDetector;
+import model.Helpclass.AnomalyReport;
+import model.Helpclass.TimeSeriesAnomalyDetector;
 import javafx.beans.property.*;
 import javafx.scene.chart.XYChart;
-import model.algorithms.Helpclass.TimeSeries;
+import model.Helpclass.TimeSeries;
 
 import java.beans.ExceptionListener;
 import java.beans.XMLDecoder;
@@ -41,7 +41,7 @@ public class Model extends Observable  {
     public void csvToFg() {
         try {
             fg = new Socket(ip,port);
-          //  out2fg = new PrintWriter(fg.getOutputStream());
+            out2fg = new PrintWriter(fg.getOutputStream());
         } catch (UnknownHostException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -195,10 +195,6 @@ public class Model extends Observable  {
         }
     }
 
-    public TimeSeriesAnomalyDetector getAnomalyDetector() {
-        return anomalyDetector;
-    }
-
     public void setAnomalyDetevtor(TimeSeriesAnomalyDetector ad ){
         this.anomalyDetector=ad;
         if(this.timeSeries!=null){
@@ -222,14 +218,12 @@ public class Model extends Observable  {
                 String[] line_in_array = line.split(",");
                 if(line_in_array[0].equals("ip")){
                     if(!validateIP(line_in_array[1])){
-                        System.out.println("the validation of the ip failed");
                         answer=false;
                         break;
                     }
                 }
                 else if(line_in_array[0].equals("port")){
                     if(!validatePort(line_in_array[1])){
-                        System.out.println("the validation of the port failed");
                         answer=false;
                         break;
                     }
@@ -237,14 +231,12 @@ public class Model extends Observable  {
                 else if(line_in_array[0].equals("run speed")) {
                     float range = Float.parseFloat(line_in_array[1]);
                     if(range <= 0 || range >= 3000 || range % 100 != 0) {
-                        System.out.println("run speed out of range!");
                         answer = false;
                         break;
                     }
                 }
                 else if(line_in_array[0].equals("flight path")){
                     if(!line_in_array[1].endsWith("csv")){
-                        System.out.println("the flight path is not good");
                         answer=false;
                         continue;}
                 }
@@ -252,14 +244,12 @@ public class Model extends Observable  {
                 // Add else if for rum speed validation
 
                 else if(!(line_in_array.length==4)){
-                    System.out.println("the length of the array is not 4");
                     answer=false;
                     break;
                 }
                 else{
                     for(int i=1; i<=3; i++){
                         if(!(isNumeric(line_in_array[i]))){
-                            System.out.println("the string is not a number");
                             answer=false;
                             break;
                         }
@@ -267,7 +257,6 @@ public class Model extends Observable  {
                 }
             }
             if(count_rows != 14) {
-                System.out.println("Missing/Too many settings!");
                 answer = false;
             }
         } catch (FileNotFoundException e) {
@@ -325,80 +314,29 @@ public class Model extends Observable  {
                     continue;
                 for(int i=0; i<line_in_array.length;i++){
                     if(line_in_array[i]==null){
-                        System.out.println("the error is null field");
                         return false;
                     }
                     float value = Float.parseFloat(line_in_array[i]);
-                    if(i==aileron){
-                        answer=checkInRange(value,"aileron");
-                        if(!answer){
-                            System.out.println("the error is aileron");
-                            break;
-                        }
-                    }
-                    if(i==elevator){
-                        answer=checkInRange(value,"elevator");
-                        if(!answer){
-                            System.out.println("the error is elevator");
-                            break;
-                        }
-                    }
-                    if(i==rudder){
-                        answer=checkInRange(value,"rudder");
-                        if(!answer){
-                            System.out.println("the error is aileron");
-                            break;
-                        }
-                    }
-                    if(i==throttle){
-                        answer=checkInRange(value,"throttle");
-                        if(!answer){
-                            System.out.println("the error is throttle");
-                            break;
-                        }
-                    }
-                    if(i==altitude){
-                        answer=checkInRange(value,"altitude");
-                        if(!answer){
-                            System.out.println("the error is altitude");
-                            break;
-                        }
-                    }
-                    if(i==airSpeed){
-                        answer=checkInRange(value,"airSpeed");
-                        if(!answer){
-                            System.out.println("the error is airspeed");
-                            break;
-                        }
-                    }
-                    if(i==heading){
-                        answer=checkInRange(value,"heading");
-                        if(!answer){
-                            System.out.println("the error is heading");
-                            break;
-                        }
-                    }
-                    if(i==roll){
-                        answer=checkInRange(value,"roll");
-                        if(!answer){
-                            System.out.println("the error is roll");
-                            break;
-                        }
-                    }
-                    if(i==pitch){
-                        answer=checkInRange(value,"pitch");
-                        if(!answer){
-                            System.out.println("the error is pitch");
-                            break;
-                        }
-                    }
-                    if(i==yaw){
-                        answer=checkInRange(value,"yaw");
-                        if(!answer){
-                            System.out.println("the error is yaw");
-                            break;
-                        }
-                    }
+                    if(i==aileron)
+                        if(!checkInRange(value,"aileron"))return false;
+                    if(i==elevator)
+                        if(!checkInRange(value,"elevator"))return false;
+                    if(i==rudder)
+                        if(!checkInRange(value,"rudder"))return false;
+                    if(i==throttle)
+                        if(!checkInRange(value,"throttle"))return false;
+                    if(i==altitude)
+                        if(!checkInRange(value,"altitude"))return false;
+                    if(i==airSpeed)
+                        if(!checkInRange(value,"airSpeed"))return false;
+                    if(i==heading)
+                        if(!checkInRange(value,"heading"))return false;
+                    if(i==roll)
+                        if(!checkInRange(value,"roll"))return false;
+                    if(i==pitch)
+                        if(!checkInRange(value,"pitch"))return false;
+                    if(i==yaw)
+                        if(!checkInRange(value,"yaw"))return false;
                 }
             }
 
@@ -408,7 +346,6 @@ public class Model extends Observable  {
         return answer;
     }
 
-    //changes
     public boolean checkInRange(float value, String feature){
         boolean answer = true;
         if(value<setting_map.get(feature).get(2) || value>setting_map.get(feature).get(1)){
@@ -439,8 +376,8 @@ public class Model extends Observable  {
                 public void run() {
                    // System.out.println("sending row "+ timestep.get() + " with time speed: " + time_speed.get());
                     String row_data = timeSeries.row_array(timestep.get());
-                    //out2fg.println(row_data);
-                    //out2fg.flush();
+                    out2fg.println(row_data);
+                    out2fg.flush();
                     timestep.set(timestep.get()+1);
 
                 }
@@ -448,14 +385,12 @@ public class Model extends Observable  {
         }
     }
 
-
     public void pause() {
         if(t != null) {
             t.cancel();
         }
         t=null;
     }
-
 
     public void stop() {
         if(t != null) {
@@ -495,7 +430,4 @@ public class Model extends Observable  {
         return anomalyDetector.paint(timeSeries,slected_feature_N);
     }
 
-    public TimeSeries getTimeSeries() {
-        return timeSeries;
-    }
 }

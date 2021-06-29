@@ -10,8 +10,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.text.Text;
 
-import java.awt.*;
-
 public class PannelController {
 
     public IntegerProperty time_step;

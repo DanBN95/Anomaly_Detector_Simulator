@@ -1,8 +1,8 @@
 package view_model;
 
 
-import model.algorithms.AnomalyDetector.TimeSeriesAnomalyDetector;
-import model.algorithms.Helpclass.TimeSeries;
+import model.Helpclass.TimeSeriesAnomalyDetector;
+import model.Helpclass.TimeSeries;
 
 import javafx.application.Platform;
 import javafx.beans.property.*;
@@ -115,7 +115,7 @@ public class ViewModel implements Observer {
     }
 
     synchronized public void changeTimeSpeed(double time) {
-        pause.run();
+        model.pause();
         if(time > 0) {
             if (this.time.get() >= 0.25 && this.time.get() < 2) {
                 this.time.setValue(this.time.get() + time);
@@ -125,10 +125,10 @@ public class ViewModel implements Observer {
         else if(time < 0) {
             if (this.time.get() > 0.25 && this.time.get() <= 2) {
                 this.time.setValue(this.time.get() + time);
-                time_speed.set((long) (100 / this.time.get()));
+                time_speed.set((long) (200 / this.time.get()));
             }
         }
-        play.run();
+        model.play();
     }
 
     public HashMap<String, SimpleFloatProperty> getDisplayVariables() {
