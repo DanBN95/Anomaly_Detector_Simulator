@@ -1,11 +1,14 @@
 package model;
 
-import PTM1.AnomalyDetector.TimeSeriesAnomalyDetector;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleFloatProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import sample.UserSettings;
-import PTM1.Helpclass.TimeSeries;
+import model.Helpclass.AnomalyReport;
+import model.Helpclass.TimeSeriesAnomalyDetector;
+import javafx.beans.property.*;
+import javafx.scene.chart.XYChart;
+import model.Helpclass.TimeSeries;
+
+import java.beans.ExceptionListener;
+import java.beans.XMLDecoder;
+import java.beans.XMLEncoder;
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -13,37 +16,32 @@ import java.util.*;
 
 public class Model extends Observable  {
 
-    TimeSeries timeSeries;
-    TimeSeriesAnomalyDetector anomalyDetector;
+    public TimeSeries timeSeries,detect_timeSeries;
+    public TimeSeriesAnomalyDetector anomalyDetector;
+
     PrintWriter out2fg;
     Socket fg;
+
     public HashMap<String, ArrayList<Integer>> setting_map;
+    public HashMap<String,List<AnomalyReport>> AnomalyReports;
+
     int port;
     String ip;
+    public String settings;
     Timer t = null;
+
     public IntegerProperty timestep;
+    public volatile LongProperty time_speed;
+    public float time_default;
 
     public Model(String settings) {
-        timestep =new SimpleIntegerProperty();
-        setSettings(settings);
-
-        // this.userSettings = new UserSettings();
-       // serializeToXML(userSettings,settings);
-       // userSettings = desrializeFromXML(settings);
+        this.settings = settings;
     }
 
-    public void csvToFg(TimeSeries ts) {
-    /*
-    suppose to take the timeseries, connecting to fg,
-    read line by line from the csv file in the ts values separated by comma(','),
-    and for every value the fg put it in the right placee
-    thank to the playback_small file
-     */
-            System.out.println("csvToFg");
+    public void csvToFg() {
         try {
             fg = new Socket(ip,port);
             out2fg = new PrintWriter(fg.getOutputStream());
-
         } catch (UnknownHostException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -52,188 +50,142 @@ public class Model extends Observable  {
     }
 
     public void setSettings(String settings) {
-
+        time_default = 200;
         setting_map = new HashMap<>();
+        if (settings.contains(".txt"))
+            loadSettingsFromTxt(settings);
+        else if(settings.contains(".xml")) {
+            serializeToXML(settings);
+            desrializeFromXML(settings);
+        }
+
+
+    }
+
+    public void loadSettingsFromTxt(String settings) {
         Scanner myScanner = null;
         try {
             myScanner = new Scanner(new BufferedReader(new FileReader(settings)));
             while (myScanner.hasNextLine()) {
-
                 String line = myScanner.nextLine();
                 String[] vec_by_row = line.split(",");
-                if(vec_by_row[0].equals("ip")){
-                    ip=vec_by_row[1];
+                if (vec_by_row[0].equals("ip")) {
+                    ip = vec_by_row[1];
                     continue;
                 }
-                if(vec_by_row[0].equals("port")){
-                    port=Integer.parseInt(vec_by_row[1]);
+                else if (vec_by_row[0].equals("port")) {
+                    port = Integer.parseInt(vec_by_row[1]);
+                    continue;
+                }
+                else if (vec_by_row[0].equals("run speed")) {
+                    time_speed.set(Long.parseLong(vec_by_row[1]));
+                    time_default = Float.parseFloat(vec_by_row[1]);
+                    continue;
+                }
+                else if (vec_by_row[0].equals("flight path")) {
+                    setTimeSeries(new TimeSeries(vec_by_row[1]));
+                    setChanged();
+                    notifyObservers();
                     continue;
                 }
                 setting_map.put(vec_by_row[0], new ArrayList<>());
-                int i=0;
+                int i = 0;
                 for (String s : vec_by_row) {
-                    if(i==0){
+                    if (i == 0) {
                         i++;
                         continue;
                     }
                     setting_map.get(vec_by_row[0]).add(Integer.parseInt(s));
                 }
             }
+
+            myScanner.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-//        try {
-//            String [] strings = InetAddress.getLocalHost().toString().split("/");
-//            userSettings.setIp(strings[1]);
-//            System.out.println(userSettings.getIp());
-//        } catch (UnknownHostException e) {
-//            e.printStackTrace();
-////        }
-//        HashMap<String,Properties> hsm = new HashMap<>();
-//        userSettings.setIp("127.0.0.1");
-//        userSettings.setPort("5400");
-//
-//
-//        userSettings.setHsm(hsm);
-//        String [] features = {"aileron","elevator","rudder","throttle","altitude","airspeed","heading","roll","pitch","yaw"};
-//        int [] index = {0,1,2,6,16,21,19,28,29,20};
-//        float [] max = {1,1,1,1,1}
-//        String [] min = new String[10];
-//        for(String f : features) {
-//            Properties p = new Properties();
-//            hsm.put(f,getProp(p,))
-//        }
-//
-//
-//        Properties properties = new Properties();
-//        properties.setAileron_index(0);
-//        properties.setElevator_index(1);
-//        properties.setRudder_index(2);
-//        properties.setThrottle_index(6);
-//        properties.setAltitude_index(16);
-//        properties.setAirSpeed_index(21);
-//        properties.setHeading_index(19);
-//        properties.setRoll_index(28);
-//        properties.setPitch_index(29);
-//        properties.setYaw_index(20);
-//
-//        properties.setAileron_max(1);
-//        properties.setAileron_min(-1);
-//        properties.setElevator_max(1);
-//        properties.setElevator_min(-1);
-//        properties.setRudder_max(1);
-//        properties.setRudder_min(-1);
-//        properties.setThrottle_max(1);
-//        properties.setThrottle_min(-1);
-//        properties.setAltitude_max(1);
-//        properties.setAltitude_min(-1);
-//        properties.setAirSpeed_max(100000);
-//        properties.setAirSpeed_min(0);
-//        properties.setHeading_max(300);
-//        properties.setHeading_min(100);
-//        properties.setRoll_max(40);
-//        properties.setRoll_min(-38);
-//        properties.setPitch_max(17);
-//        properties.setPitch_min(-10);
-//        properties.setYaw_max(90);
-//        properties.setYaw_min(-30);
-//
-//        userSettings.setProperties(properties);
-//    }
-
-//    public Properties getProp(Properties p,int index,float max, float min) {
-//        p.setIndex(index);
-//        p.setMax(max);
-//        p.setMin(min);
-//        return p;
-//    }
-
-//    public UserSettings desrializeFromXML(String xmlFile) {
-//        try {
-//            BufferedInputStream file = new BufferedInputStream(new FileInputStream(xmlFile));
-//            XMLDecoder decoder = new XMLDecoder(file);
-//            UserSettings decodedSettings = (UserSettings) decoder.readObject();
-//            decoder.close();
-//            file.close();
-//            return decodedSettings;
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        return null;
-//    }
-//
-//    public void serializeToXML(UserSettings us,String settings) {
-//
-//        try {
-//            FileOutputStream fos = new FileOutputStream(settings);
-//            XMLEncoder encoder = new XMLEncoder(fos);
-//            encoder.setExceptionListener(new ExceptionListener() {
-//                @Override
-//                public void exceptionThrown(Exception e) {
-//                    System.out.println("Exception occurred!");
-//                }
-//            });
-//
-//            // writing to xml file
-//            encoder.writeObject(us);
-//            encoder.close();
-//            fos.close();
-//
-//
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        } catch (UnknownHostException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//
-//    public void setAileron(float aileron) {
-//        String command = userSettings.getAileron();
-//        out2fg.println(command+" "+aileron);
-//        out2fg.flush();
-//    }
-//
-//    public void setElevator(float elevator) {
-//        String command = userSettings.getElevator();
-//        out2fg.println(command+" "+elevator);
-//        out2fg.flush();
-//    }
-//
-//    public void setRudder(float rudder) {
-//        String command = userSettings.getRudder();
-//        out2fg.println(command+" "+rudder);
-//        out2fg.flush();
-//    }
-//
-//    public void setThrottle(float throttle) {
-//        String command = userSettings.getThrottle();
-//        out2fg.println(command+" "+throttle);
-//        out2fg.flush();
-//    }
-//
-//    public void setAltitude(float altitude) {
-//        String command = userSettings.getAltitude();
-//        out2fg.println(command+" "+altitude);
-//        out2fg.flush();
-//    }
-//
-//    public void setAirSpeed(float airSpeed) {
-//        String command = userSettings.getAirSpeed();
-//        out2fg.println(command+" "+airSpeed);
-//        out2fg.flush();
-//    }
-//
-//    public void setHeading(float heading) {
-//        String command = userSettings.getHeading();
-//        out2fg.println(command+" "+heading);
-//        out2fg.flush();
-//    }
     }
+
+    public void desrializeFromXML(String xmlFile) {
+        try {
+            BufferedInputStream file = new BufferedInputStream(new FileInputStream(xmlFile));
+            XMLDecoder decoder = new XMLDecoder(file);
+            UserSettings decodedSettings = (UserSettings) decoder.readObject();
+            decoder.close();
+            file.close();
+
+            for(String s : decodedSettings.getHsm().keySet()) {
+                ArrayList<Integer>list = new ArrayList();
+                int index = decodedSettings.getHsm().get(s).getIndex();
+                int max = decodedSettings.getHsm().get(s).getMax();
+                int min = decodedSettings.getHsm().get(s).getMin();
+
+                list.add(0,index);
+                list.add(1,max);
+                list.add(2,min);
+
+                setting_map.put(s,list);
+
+                port = decodedSettings.getPort();
+                ip = decodedSettings.getIp();
+                time_speed.set((long)decodedSettings.getRun_speed());
+                time_default = decodedSettings.getRun_speed();
+                //timeSeries = new TimeSeries()
+            }
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void serializeToXML(String settings) {
+
+        UserSettings us = new UserSettings();
+        HashMap<String, Properties> userProp = new HashMap<>();
+        String [] features = {"aileron","elevator","rudder","throttle","altitude","airSpeed","heading","roll","pitch","yaw"};
+        int [] index = {0,1,2,6,16,21,19,28,29,20};
+        int [] max = {1,1,0,1,860,100,350,40,17,90};
+        int [] min = {-1,-1,0,0,0,0,80,-38,-10,-30};
+        int i = 0;
+        for(String s : features) {
+            Properties p = new Properties();
+            p.setIndex(index[i]);
+            p.setMax(max[i]);
+            p.setMin(min[i]);
+            userProp.put(s,p);
+            i++;
+        }
+        us.setHsm(userProp);
+        us.setIp("127.0.0.1");
+        us.setPort(5400);
+        us.setRun_speed(200);
+        try {
+            FileOutputStream fos = new FileOutputStream(settings);
+            XMLEncoder encoder = new XMLEncoder(fos);
+            encoder.setExceptionListener(new ExceptionListener() {
+                @Override
+                public void exceptionThrown(Exception e) {
+                    System.out.println("Exception occurred encode to XML(Model,line 285)!");
+                }
+            });
+
+            // writing to xml file
+            encoder.writeObject(us);
+            encoder.close();
+            fos.close();
+
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void finalize() {
         try {
             out2fg.close();
@@ -243,25 +195,176 @@ public class Model extends Observable  {
         }
     }
 
-    public TimeSeriesAnomalyDetector getAnomalyDetector() {
-        return anomalyDetector;
-    }
-
     public void setAnomalyDetevtor(TimeSeriesAnomalyDetector ad ){
         this.anomalyDetector=ad;
         if(this.timeSeries!=null){
             this.anomalyDetector.learnNormal(this.timeSeries);
-            this.anomalyDetector.detect(this.timeSeries);
-
+        }
+        if(this.detect_timeSeries!=null){
+            this.anomalyDetector.detect(detect_timeSeries);
         }
     }
 
-    // Projection Functions:
+    /// the function checks the validation of the settings file the user uploaded
+    public boolean CheckSettings(File f){
+        boolean answer = true;
+        int count_rows = 0;
+        Scanner scanner = null;
+        try{
+            scanner = new Scanner(new BufferedReader(new FileReader(f.getPath())));
+            while (scanner.hasNextLine()){
+                count_rows++;
+                String line = scanner.nextLine();
+                String[] line_in_array = line.split(",");
+                if(line_in_array[0].equals("ip")){
+                    if(!validateIP(line_in_array[1])){
+                        answer=false;
+                        break;
+                    }
+                }
+                else if(line_in_array[0].equals("port")){
+                    if(!validatePort(line_in_array[1])){
+                        answer=false;
+                        break;
+                    }
+                }
+                else if(line_in_array[0].equals("run speed")) {
+                    float range = Float.parseFloat(line_in_array[1]);
+                    if(range <= 0 || range >= 3000 || range % 100 != 0) {
+                        answer = false;
+                        break;
+                    }
+                }
+                else if(line_in_array[0].equals("flight path")){
+                    if(!line_in_array[1].endsWith("csv")){
+                        answer=false;
+                        continue;}
+                }
+                //*********************************************
+                // Add else if for rum speed validation
+
+                else if(!(line_in_array.length==4)){
+                    answer=false;
+                    break;
+                }
+                else{
+                    for(int i=1; i<=3; i++){
+                        if(!(isNumeric(line_in_array[i]))){
+                            answer=false;
+                            break;
+                        }
+                    }
+                }
+            }
+            if(count_rows != 14) {
+                answer = false;
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        return answer;
+    }
+
+    ///  the function checks if a string is a number
+    public static boolean isNumeric(String s){
+        if (s == null) {
+            return false;
+        }
+        try {
+            double d = Double.parseDouble(s);
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+        return true;
+    }
+
+    ///  the function checks if the IP is valid
+    public static boolean validateIP(final String ip) {
+        String PATTERN = "^((0|1\\d?\\d?|2[0-4]?\\d?|25[0-5]?|[3-9]\\d?)\\.){3}(0|1\\d?\\d?|2[0-4]?\\d?|25[0-5]?|[3-9]\\d?)$";
+        return ip.matches(PATTERN);
+    }
+
+    ///  the function checks if the port is valid
+    public static boolean validatePort(final String ip) {
+        String PATTERN = "^([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$";
+        return ip.matches(PATTERN);
+    }
+
+    public boolean checkCSVfile(File f){
+        boolean answer =true;
+        Scanner scanner = null;
+        // Index in the csv file
+        int aileron = this.setting_map.get("aileron").get(0);
+        int elevator = this.setting_map.get("elevator").get(0);
+        int rudder = this.setting_map.get("rudder").get(0);
+        int throttle = this.setting_map.get("throttle").get(0);
+        int altitude = this.setting_map.get("altitude").get(0);
+        int airSpeed = this.setting_map.get("airSpeed").get(0);
+        int heading = this.setting_map.get("heading").get(0);
+        int roll = this.setting_map.get("roll").get(0);
+        int pitch = this.setting_map.get("pitch").get(0);
+        int yaw = this.setting_map.get("yaw").get(0);
+
+        try {
+            scanner = new Scanner(new BufferedReader(new FileReader(f.getPath())));
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                String[] line_in_array = line.split(",");
+                if(!isNumeric(line_in_array[0]))
+                    continue;
+                for(int i=0; i<line_in_array.length;i++){
+                    if(line_in_array[i]==null){
+                        return false;
+                    }
+                    float value = Float.parseFloat(line_in_array[i]);
+                    if(i==aileron)
+                        if(!checkInRange(value,"aileron"))return false;
+                    if(i==elevator)
+                        if(!checkInRange(value,"elevator"))return false;
+                    if(i==rudder)
+                        if(!checkInRange(value,"rudder"))return false;
+                    if(i==throttle)
+                        if(!checkInRange(value,"throttle"))return false;
+                    if(i==altitude)
+                        if(!checkInRange(value,"altitude"))return false;
+                    if(i==airSpeed)
+                        if(!checkInRange(value,"airSpeed"))return false;
+                    if(i==heading)
+                        if(!checkInRange(value,"heading"))return false;
+                    if(i==roll)
+                        if(!checkInRange(value,"roll"))return false;
+                    if(i==pitch)
+                        if(!checkInRange(value,"pitch"))return false;
+                    if(i==yaw)
+                        if(!checkInRange(value,"yaw"))return false;
+                }
+            }
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        return answer;
+    }
+
+    public boolean checkInRange(float value, String feature){
+        boolean answer = true;
+        if(value<setting_map.get(feature).get(2) || value>setting_map.get(feature).get(1)){
+            answer=false;
+        }
+        return answer;
+    }
+
     public void setTimeSeries(TimeSeries ts) {
         this.timeSeries = ts;
-        if(this.anomalyDetector!=null){
-            this.anomalyDetector.learnNormal(this.timeSeries);
-            this.anomalyDetector.detect(this.timeSeries);
+        if(anomalyDetector!=null){
+            anomalyDetector.learnNormal(this.timeSeries);
+        }
+    }
+
+    public void set_detect_TimeSeries(File f) {
+        detect_timeSeries = new TimeSeries(f.getPath());
+        if(anomalyDetector!=null){
+            AnomalyReports=anomalyDetector.detect(detect_timeSeries);
         }
     }
 
@@ -271,26 +374,28 @@ public class Model extends Observable  {
             t.scheduleAtFixedRate(new TimerTask() {
                 @Override
                 public void run() {
-                    System.out.println("sending row "+ timestep.get());
+                   // System.out.println("sending row "+ timestep.get() + " with time speed: " + time_speed.get());
                     String row_data = timeSeries.row_array(timestep.get());
                     out2fg.println(row_data);
-                    System.out.println(row_data);
+                    out2fg.flush();
                     timestep.set(timestep.get()+1);
 
                 }
-            },0,300);
+            },0,time_speed.get());
         }
     }
 
-
     public void pause() {
-        t.cancel();
+        if(t != null) {
+            t.cancel();
+        }
         t=null;
     }
 
-
     public void stop() {
-        t.cancel();
+        if(t != null) {
+            t.cancel();
+        }
         t=null;
         timestep.set(0);
     }
@@ -303,7 +408,26 @@ public class Model extends Observable  {
                 scores.put(feature, new SimpleFloatProperty());
             }
         }
-            System.out.println(scores.keySet());
             return scores;
     }
+
+    public float[] getSelected_vector(String selected_feature){
+        String feature_name = setting_map.containsKey(selected_feature) ? timeSeries.getFeaturesList()[setting_map.get(selected_feature).get(0)] : selected_feature;
+        float[] selected_feature_vals = timeSeries.getHashMap().get(feature_name);
+        return selected_feature_vals;
+    }
+
+    public float[] getBest_cor_Selected_vector(String selected_feature){
+        String best_c_feature = setting_map.containsKey(selected_feature)? timeSeries.getbest_c_feature(setting_map.get(selected_feature).get(0)) : timeSeries.getbest_c_feature(selected_feature);
+        float[] selected_feature_vals=null;
+        if(!best_c_feature.equals(""))
+             selected_feature_vals = timeSeries.getHashMap().get(best_c_feature);
+        return selected_feature_vals;
+    }
+
+    public List<XYChart.Series> paintAlgo(String selected_featureX){
+        String slected_feature_N = setting_map.containsKey(selected_featureX)? timeSeries.getFeaturesList()[setting_map.get(selected_featureX).get(0)]:selected_featureX;
+        return anomalyDetector.paint(timeSeries,slected_feature_N);
+    }
+
 }

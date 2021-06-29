@@ -1,140 +1,165 @@
 package view_model;
 
 
-import PTM1.AnomalyDetector.TimeSeriesAnomalyDetector;
-import PTM1.Helpclass.Point;
-import PTM1.Helpclass.TimeSeries;
+import model.Helpclass.TimeSeriesAnomalyDetector;
+import model.Helpclass.TimeSeries;
 
 import javafx.application.Platform;
 import javafx.beans.property.*;
 
-import javafx.beans.property.FloatProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 
+import javafx.scene.chart.XYChart;
 import model.Model;
 
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.List;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
+import java.util.concurrent.*;
 
 
 public class ViewModel implements Observer {
 
     Model model;
 
-    TimeSeries timeSeries;
-    TimeSeriesAnomalyDetector anomalyDetector;
-
-    public File file;
-
-    public final Runnable play,pause,stop;
+    public final Runnable play,pause,stop,forward,backward;
 
     public IntegerProperty time_step;
+    public LongProperty time_speed;
+    public DoubleProperty time;
 
     private HashMap<String,SimpleFloatProperty> displayVariables;
-    public FloatProperty aileron,elevator,rudder,throttle,altitude,airSpeed,heading;
-    public StringProperty selected_feature;
-    public BooleanProperty check_settings;
+    public StringProperty selected_feature,B_S_feature;
 
+    private ExecutorService scheduledExecutorService;
+
+    public float[] selected_feature_vector;
+    public float[] Best_c_feature_vector;
+
+    public BooleanProperty check_for_settings = new SimpleBooleanProperty(true);
+    public BooleanProperty settings_ok = new SimpleBooleanProperty(false);
+    public BooleanProperty display_bool_features;
+
+    public HashMap<String, ArrayList<Integer>> setting_map;
 
 
     public ViewModel(Model m) {
-        this.model = m;
-        this.model.addObserver(this);
+        model = m;
+        model.addObserver(this);
 
-        displayVariables = this.model.showFields();
-        check_settings=new SimpleBooleanProperty(false);
-        check_settings.setValue(true);
-        selected_feature=new SimpleStringProperty();
+        scheduledExecutorService = Executors.newSingleThreadExecutor();
 
+        selected_feature = new SimpleStringProperty();
+        B_S_feature = new SimpleStringProperty();
+        display_bool_features = new SimpleBooleanProperty(false);
+        time = new SimpleDoubleProperty();
         time_step = new SimpleIntegerProperty(0);
+        time_speed = new SimpleLongProperty((long)model.time_default);
+        time.setValue(1);
+        model.timestep =time_step;
+        model.time_speed =time_speed;
+        model.setSettings(model.settings);
+        displayVariables = this.model.showFields();
+        time_step.addListener((o, ov, nv) -> setTimeStep((int) nv));
 
-        this.model.timestep=this.time_step;
-
-        //  When those features are changing, it evoke a change in the model
-//        this.displayVariables.get("aileron").addListener((o, val, newval) -> model.setAileron((float) newval));
-//        this.displayVariables.get("elevator").addListener((o, val, newval) -> model.setElevator((float) newval));
-//        this.displayVariables.get("rudder").addListener((o, val, newval) -> model.setRudder((float) newval));
-//        this.displayVariables.get("throttle").addListener((o, val, newval) -> model.setThrottle((float) newval));
-//        this.displayVariables.get("airSpeed").addListener((o, val, newval) -> model.setAirSpeed((float) newval));
-//        this.displayVariables.get("heading").addListener((o, val, newval) -> model.setHeading((float) newval));
-
-          //Change in the time step evoke setTime_step function with the new value as a parameter
-
-        time_step.addListener((o, ov, nv) -> {
-            Platform.runLater(() -> setTimeStep((int) nv));
-        });
-
-        play=()->model.play();
-        stop=()->model.stop();
-        pause=()->model.pause();
+        play = () -> scheduledExecutorService.execute(()->model.play());
+        stop = ()-> scheduledExecutorService.execute(()->model.stop());
+        pause = ()-> scheduledExecutorService.execute(()->model.pause());
+        forward = ()-> scheduledExecutorService.execute(()->this.changeTimeSpeed(0.25));
+        backward = ()-> scheduledExecutorService.execute(()->this.changeTimeSpeed(-0.25));
 
     }
-
-    public void connect2fg(){
-        model.csvToFg(this.timeSeries);
-    }
-
-    public void setTimeSeries(File f) {
-        this.file = f;
-        this.timeSeries = new TimeSeries(file.getPath());
-        model.setTimeSeries(this.timeSeries);
-    }
-
-
-    public void setTimeStep(int time_step) {
-        System.out.println("timestep from slider: " + time_step);
-        this.model.timestep.set(time_step);
-        if(timeSeries!=null){
-            for (String feature : this.displayVariables.keySet()) {
-                    displayVariables.get(feature).setValue(timeSeries.valueAtIndex(time_step,this.model.setting_map.get(feature).get(0)));
-                 }
-        }
-    }
-//        aileron.setValue(timeSeries.valueAtIndex(time_step, "aileron"));
-//        elevator.setValue(timeSeries.valueAtIndex(time_step, "elevator"));
-//        rudder.setValue(timeSeries.valueAtIndex(time_step, "rudder"));
-//        throttle.setValue(timeSeries.valueAtIndex(time_step, "throttle"));
-//        altitude.setValue(timeSeries.valueAtIndex(time_step, "altitude"));
-//        airSpeed.setValue(timeSeries.valueAtIndex(time_step, "air speed"));
-//        heading.setValue(timeSeries.valueAtIndex(time_step, "heading"));
-
-//    public void setSelected_feature(String new_selected_feature ) {
-//        this.selected_feature = new_selected_feature;
-//    }
-
-    public HashMap<String, SimpleFloatProperty> getDisplayVariables() {
-        return displayVariables;
-    }
-
 
     @Override
     public void update(Observable o, Object arg) {
+          this.display_bool_features.setValue(true);
+   }
 
+    public void setTimeStep(int time_step){
+        if(model.timeSeries !=null){
+            for (String feature : this.displayVariables.keySet()) {
+                displayVariables.get(feature).setValue(model.timeSeries.valueAtIndex(time_step,this.model.setting_map.get(feature).get(0)));
+            }
+        }
     }
 
-    public TimeSeriesAnomalyDetector getAnomalyDetector() {
-        return anomalyDetector;
+    public void sendSettingsToModel(File f){
+        if(this.model.CheckSettings(f)){
+            model.setSettings(f.getPath());
+            setting_map=model.setting_map;
+            settings_ok.set(!settings_ok.get());
+        }
+        else{
+            check_for_settings.set(!check_for_settings.get());
+        }
+    }
+
+    public List<XYChart.Series> getpaintFunc(){
+        return model.paintAlgo(selected_feature.getValue());
+    }
+
+    public float[] get_detect_point(int time){
+       return model.anomalyDetector.detect_P(model.detect_timeSeries,selected_feature.getValue(),time);
+    }
+
+    public void setbest_c_feature(){
+        B_S_feature.setValue(getDetect_timeSeries().getbest_c_feature(selected_feature.get()));
+    }
+
+    public void set_selected_vectors(){
+        selected_feature_vector = model.getSelected_vector(selected_feature.getValue());
+        Best_c_feature_vector = model.getBest_cor_Selected_vector(selected_feature.getValue());
+    }
+
+    synchronized public void changeTimeSpeed(double time) {
+        model.pause();
+        if(time > 0) {
+            if (this.time.get() >= 0.25 && this.time.get() < 2) {
+                this.time.setValue(this.time.get() + time);
+                time_speed.set((long) (200 / this.time.get()));
+            }
+        }
+        else if(time < 0) {
+            if (this.time.get() > 0.25 && this.time.get() <= 2) {
+                this.time.setValue(this.time.get() + time);
+                time_speed.set((long) (200 / this.time.get()));
+            }
+        }
+        model.play();
+    }
+
+    public HashMap<String, SimpleFloatProperty> getDisplayVariables() {
+        return displayVariables;
     }
 
     public void setAnomalyDetector(TimeSeriesAnomalyDetector anomalyDetector) {
         this.model.setAnomalyDetevtor(anomalyDetector);
     }
 
+    public void connect2fg(){
+        model.csvToFg();
+    }
+
+    public boolean set_detect_TimeSeries(File f) {
+        boolean answer = true;
+        if(this.model.checkCSVfile(f)){
+            model.set_detect_TimeSeries(f);
+        }
+        else
+            answer=false;
+        return answer;
+    }
+
+    public TimeSeries getTimeSeries(){
+        return model.timeSeries;
+    }
+
+    public TimeSeries getDetect_timeSeries(){
+        return model.detect_timeSeries;
+    }
 
 
-//    public Runnable getpainter(){
-//        return ()->this.model.getAnomalyDetector().paint(this.timeSeries);
-//    }
 }
